@@ -2,7 +2,9 @@ package com.base.domain.port.in;
 
 import java.util.List;
 
-public interface IBaseUserCase<R> {
+public interface IBaseUseCase<R> {
+
+    String ping();
 
     R create(R domain);
 

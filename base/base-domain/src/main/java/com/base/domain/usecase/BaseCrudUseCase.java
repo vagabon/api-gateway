@@ -4,10 +4,10 @@ import java.time.Instant;
 import java.util.List;
 
 import com.base.domain.model.BaseDomain;
-import com.base.domain.port.in.IBaseUserCase;
+import com.base.domain.port.in.IBaseUseCase;
 import com.base.domain.port.out.IBaseRepositoryPortOut;
 
-public abstract class BaseCrudUseCase<R extends BaseDomain> extends BaseUseCase implements IBaseUserCase<R> {
+public abstract class BaseCrudUseCase<R extends BaseDomain> extends BaseUseCase implements IBaseUseCase<R> {
 
     protected final IBaseRepositoryPortOut<R> repositoryPort;
 
