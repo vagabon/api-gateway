@@ -1,0 +1,11 @@
+{
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "search.exclude": {
+        "**/target/**": true
+    },
+    "files.watcherExclude": {
+        "**/target/**": true
+    },
+    "explorer.fileNesting.enabled": true
+}
