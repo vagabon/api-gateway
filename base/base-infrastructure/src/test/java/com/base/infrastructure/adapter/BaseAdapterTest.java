@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.TypedQuery;
 
+import com.base.domain.exception.MetierException;
 import com.base.domain.model.BaseDomain;
 import com.base.infrastructure.mapper.BaseMapper;
 import com.base.infrastructure.persistence.entity.BaseEntity;
@@ -44,8 +44,11 @@ class BaseAdapterTest {
     static class TestDomain extends BaseDomain {
     }
 
-    static class TestAdapter extends BaseAdapter<TestEntity, TestDomain> {
-        TestAdapter(IBaseRepository<TestEntity> repository, BaseMapper<TestEntity, TestDomain> mapper) {
+    static class TestAdapter
+        extends BaseAdapter<TestEntity, TestDomain, IBaseRepository<TestEntity>> {
+        TestAdapter(
+            IBaseRepository<TestEntity> repository,
+            BaseMapper<TestEntity, TestDomain> mapper) {
             super(repository, mapper, TestEntity.class);
         }
     }
@@ -124,8 +127,9 @@ class BaseAdapterTest {
         when(mapper.toEntity(input)).thenReturn(entity(99L));
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adapter.update(input)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Not found : id = 99");
+        assertThatThrownBy(() -> adapter.update(input))
+            .isInstanceOf(MetierException.class)
+            .hasMessage("ID not found : 99");
 
         verify(repository, never()).save(any());
     }
@@ -146,8 +150,9 @@ class BaseAdapterTest {
     void findById_siIntrouvable_leveEntityNotFound() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adapter.findById(99L)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Not found : id = 99");
+        assertThatThrownBy(() -> adapter.findById(99L))
+            .isInstanceOf(MetierException.class)
+            .hasMessage("ID not found : 99");
     }
 
     // ---------- delete ----------
@@ -169,7 +174,8 @@ class BaseAdapterTest {
     void delete_siIntrouvable_neSupprimeRien() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adapter.delete(99L)).isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> adapter.delete(99L))
+            .isInstanceOf(MetierException.class);
 
         verify(repository, never()).delete(any());
     }
@@ -194,7 +200,8 @@ class BaseAdapterTest {
         Pageable pageable = captor.getValue();
         assertThat(pageable.getPageNumber()).isEqualTo(2);
         assertThat(pageable.getPageSize()).isEqualTo(10);
-        assertThat(pageable.getSort().getOrderFor("name").getDirection()).isEqualTo(Sort.Direction.ASC);
+        assertThat(pageable.getSort().getOrderFor("name").getDirection())
+            .isEqualTo(Sort.Direction.ASC);
         assertThat(result).containsExactly(d1, d2);
     }
 

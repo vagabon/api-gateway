@@ -6,7 +6,8 @@ import java.util.List;
 import jakarta.persistence.EntityNotFoundException;
 
 import com.base.domain.model.BaseDomain;
-import com.base.domain.usecase.BaseCrudUseCase;
+import com.base.domain.port.in.IBaseUsecase;
+import com.base.domain.usecase.BaseCrudUsecase;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,14 +34,14 @@ class BaseServiceTest {
     static class TestDomain extends BaseDomain {
     }
 
-    static class TestService extends BaseService<TestDomain> {
-        TestService(BaseCrudUseCase<TestDomain> useCase) {
+    static class TestService extends BaseService<TestDomain, IBaseUsecase<TestDomain>> {
+        TestService(BaseCrudUsecase<TestDomain, ?> useCase) {
             super(useCase);
         }
     }
 
     @Mock
-    private BaseCrudUseCase<TestDomain> useCase;
+    private BaseCrudUsecase<TestDomain, ?> useCase;
 
     private TestService service;
 
@@ -58,14 +59,14 @@ class BaseServiceTest {
     // ---------- délégations simples ----------
 
     @Test
-    void ping_delegueAuUseCase() {
+    void ping_delegueAuUsecase() {
         when(useCase.ping()).thenReturn("pong");
 
         assertThat(service.ping()).isEqualTo("pong");
     }
 
     @Test
-    void create_delegueAuUseCase() {
+    void create_delegueAuUsecase() {
         TestDomain input = domain(null);
         TestDomain created = domain(1L);
         when(useCase.create(input)).thenReturn(created);
@@ -74,7 +75,7 @@ class BaseServiceTest {
     }
 
     @Test
-    void findById_delegueAuUseCase() {
+    void findById_delegueAuUsecase() {
         TestDomain found = domain(1L);
         when(useCase.findById(1L)).thenReturn(found);
 
@@ -82,7 +83,7 @@ class BaseServiceTest {
     }
 
     @Test
-    void delete_delegueAuUseCase() {
+    void delete_delegueAuUsecase() {
         when(useCase.delete(1L)).thenReturn(true);
 
         assertThat(service.delete(1L)).isTrue();
@@ -90,7 +91,7 @@ class BaseServiceTest {
     }
 
     @Test
-    void desactivate_delegueAuUseCase() {
+    void desactivate_delegueAuUsecase() {
         TestDomain off = domain(1L);
         when(useCase.desactivate(1L)).thenReturn(off);
 
@@ -98,7 +99,7 @@ class BaseServiceTest {
     }
 
     @Test
-    void findAll_delegueAuUseCase() {
+    void findAll_delegueAuUsecase() {
         List<TestDomain> list = List.of(domain(1L), domain(2L));
         when(useCase.findAll(0, 10, "name")).thenReturn(list);
 
@@ -108,7 +109,7 @@ class BaseServiceTest {
     // ---------- update ----------
 
     @Test
-    void update_avecId_delegueAuUseCase() {
+    void update_avecId_delegueAuUsecase() {
         TestDomain input = domain(1L);
         TestDomain updated = domain(1L);
         when(useCase.update(input)).thenReturn(updated);
@@ -117,11 +118,12 @@ class BaseServiceTest {
     }
 
     @Test
-    void update_sansId_leveEntityNotFound_sansAppelerLeUseCase() {
+    void update_sansId_leveEntityNotFound_sansAppelerLeUsecase() {
         TestDomain input = domain(null);
 
-        assertThatThrownBy(() -> service.update(input)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("id is null");
+        assertThatThrownBy(() -> service.update(input))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessage("id is null");
 
         verifyNoInteractions(useCase);
     }
@@ -130,28 +132,32 @@ class BaseServiceTest {
 
     @Test
     void findBy_valeursNulles_appliqueFirst0EtMax100() {
-        when(useCase.findBy(anyString(), anyList(), anyInt(), anyInt())).thenReturn(List.of());
+        when(useCase.findBy(anyString(), anyList(), anyInt(), anyInt()))
+            .thenReturn(List.of());
 
         service.findBy("name", List.of("john"), null, null);
 
         verify(useCase).findBy(anyString(), anyList(), org.mockito.ArgumentMatchers.eq(0),
-                org.mockito.ArgumentMatchers.eq(100));
+            org.mockito.ArgumentMatchers.eq(100));
     }
 
     @Test
     void findBy_conserveFirstEtMaxFournis() {
-        when(useCase.findBy(anyString(), anyList(), anyInt(), anyInt())).thenReturn(List.of());
+        when(useCase.findBy(anyString(), anyList(), anyInt(), anyInt()))
+            .thenReturn(List.of());
 
         service.findBy("name", List.of("john"), 20, 50);
 
-        verify(useCase).findBy(anyString(), anyList(), org.mockito.ArgumentMatchers.eq(20),
-                org.mockito.ArgumentMatchers.eq(50));
+        verify(useCase).findBy(anyString(), anyList(),
+            org.mockito.ArgumentMatchers.eq(20),
+            org.mockito.ArgumentMatchers.eq(50));
     }
 
     @Test
     void findBy_construitUneRequeteNonVide_etRetourneLeResultat() {
         List<TestDomain> expected = List.of(domain(1L));
-        when(useCase.findBy(anyString(), anyList(), anyInt(), anyInt())).thenReturn(expected);
+        when(useCase.findBy(anyString(), anyList(), anyInt(), anyInt()))
+            .thenReturn(expected);
 
         List<TestDomain> result = service.findBy("name", List.of("john"), 0, 10);
 
@@ -164,7 +170,8 @@ class BaseServiceTest {
 
     @Test
     void findBy_valeurQuelconque_resteInchangee() {
-        when(useCase.findBy(anyString(), anyList(), anyInt(), anyInt())).thenReturn(List.of());
+        when(useCase.findBy(anyString(), anyList(), anyInt(), anyInt()))
+            .thenReturn(List.of());
 
         service.findBy("age", List.of(42), 0, 10);
 

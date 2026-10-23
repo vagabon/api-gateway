@@ -6,31 +6,31 @@ import java.util.List;
 import jakarta.persistence.EntityNotFoundException;
 
 import com.base.domain.model.BaseDomain;
-import com.base.domain.port.in.IBaseUseCase;
-import com.base.domain.usecase.BaseCrudUseCase;
+import com.base.domain.port.in.IBaseUsecase;
 import com.base.infrastructure.utils.query.IQueryUtils;
 import com.base.infrastructure.utils.query.QueryUtils;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class BaseService<R extends BaseDomain> implements IBaseUseCase<R>, IQueryUtils {
+public abstract class BaseService<R extends BaseDomain, U extends IBaseUsecase<R>>
+    implements IBaseUsecase<R>, IQueryUtils {
 
-    protected final BaseCrudUseCase<R> useCase;
+    protected final U usecase;
 
-    protected BaseService(BaseCrudUseCase<R> useCase) {
-        this.useCase = useCase;
+    protected BaseService(U useCase) {
+        this.usecase = useCase;
     }
 
     @Override
     public String ping() {
-        return useCase.ping();
+        return usecase.ping();
     }
 
     @Override
     @Transactional
     public R create(R domain) {
-        return useCase.create(domain);
+        return usecase.create(domain);
     }
 
     @Override
@@ -39,36 +39,40 @@ public abstract class BaseService<R extends BaseDomain> implements IBaseUseCase<
         if (domain.getId() == null) {
             throw new EntityNotFoundException("id is null");
         }
-        return useCase.update(domain);
+        return usecase.update(domain);
     }
 
     @Override
     @Transactional(readOnly = true)
     public R findById(Long id) {
-        return useCase.findById(id);
+        return usecase.findById(id);
     }
 
     @Override
     @Transactional
     public boolean delete(Long id) {
-        return useCase.delete(id);
+        return usecase.delete(id);
     }
 
     @Override
     @Transactional
     public R desactivate(Long id) {
-        return useCase.desactivate(id);
+        return usecase.desactivate(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<R> findAll(Integer page, Integer max, String sort) {
-        return useCase.findAll(page, max, sort);
+        return usecase.findAll(page, max, sort);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<R> findBy(String fields, List<Object> fieldsValues, Integer first, Integer max) {
+    public List<R> findBy(
+        String fields,
+        List<Object> fieldsValues,
+        Integer first,
+        Integer max) {
         // var userConnected = getUserConnected();
         if (first == null) {
             first = 0;
@@ -93,6 +97,6 @@ public abstract class BaseService<R extends BaseDomain> implements IBaseUseCase<
             values.add(value);
         }
 
-        return useCase.findBy(sqlQuery, values, first, max);
+        return usecase.findBy(sqlQuery, values, first, max);
     }
 }

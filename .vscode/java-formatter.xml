@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<profiles version="25">
+  <profile kind="CodeFormatterProfile" name="java" version="21">
+    <!-- Longueur max -->
+    <setting id="org.eclipse.jdt.core.formatter.lineSplit" value="90" />
+    <setting id="org.eclipse.jdt.core.formatter.comment.line_length" value="90" />
+
+    <!-- Indentation : 4 espaces -->
+    <setting id="org.eclipse.jdt.core.formatter.tabulation.char" value="space" />
+    <setting id="org.eclipse.jdt.core.formatter.tabulation.size" value="4" />
+    <setting id="org.eclipse.jdt.core.formatter.indentation.size" value="4" />
+
+    <!-- Lignes coupées : +4 au lieu de +8 (défaut = 2 niveaux) -->
+    <setting id="org.eclipse.jdt.core.formatter.continuation_indentation" value="1" />
+    <setting id="org.eclipse.jdt.core.formatter.continuation_indentation_for_array_initializer"
+      value="1" />
+
+    <!-- Garde tes retours à la ligne manuels (utile pour les chaînes d'appels) -->
+    <setting id="org.eclipse.jdt.core.formatter.join_wrapped_lines" value="false" />
+
+    <!-- Lignes vides max conservées -->
+    <setting id="org.eclipse.jdt.core.formatter.number_of_empty_lines_to_preserve" value="1" />
+
+    <!-- Record : un composant par ligne -->
+    <setting id="org.eclipse.jdt.core.formatter.alignment_for_record_components" value="49" />
+
+    <!-- Même chose pour les paramètres de méthodes/constructeurs (optionnel) -->
+    <setting id="org.eclipse.jdt.core.formatter.alignment_for_parameters_in_method_declaration"
+      value="48" />
+    <setting
+      id="org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration"
+      value="48" />
+  </profile>
+</profiles>

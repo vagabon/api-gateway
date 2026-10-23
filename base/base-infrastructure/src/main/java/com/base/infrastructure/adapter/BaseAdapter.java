@@ -3,9 +3,9 @@ package com.base.infrastructure.adapter;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 
+import com.base.domain.exception.MetierException;
 import com.base.domain.model.BaseDomain;
 import com.base.domain.port.out.IBaseRepositoryPortOut;
 import com.base.infrastructure.mapper.BaseMapper;
@@ -17,19 +17,22 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain>
-        implements IBaseRepositoryPortOut<R> {
+public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain, J extends IBaseRepository<E>>
+    implements IBaseRepositoryPortOut<R> {
 
-    private static final String NOT_FOUND = "Not found : id = %d";
+    private static final String NOT_FOUND = "ID not found : %d";
 
-    private final IBaseRepository<E> repository;
-    private final BaseMapper<E, R> mapper;
+    protected final J repository;
+    protected final BaseMapper<E, R> mapper;
     private final Class<E> entityClass;
 
     @PersistenceContext
     private EntityManager em;
 
-    protected BaseAdapter(IBaseRepository<E> repository, BaseMapper<E, R> mapper, Class<E> entityClass) {
+    protected BaseAdapter(
+        J repository,
+        BaseMapper<E, R> mapper,
+        Class<E> entityClass) {
         this.repository = repository;
         this.mapper = mapper;
         this.entityClass = entityClass;
@@ -70,7 +73,7 @@ public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain>
 
     private E entityFindById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(NOT_FOUND.formatted(id)));
+            .orElseThrow(() -> new MetierException(NOT_FOUND.formatted(id)));
     }
 
     @Override
@@ -88,7 +91,8 @@ public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain>
             query.setParameter(i + 1, values.get(i));
         }
 
-        return query.setFirstResult(page).setMaxResults(max).getResultList().stream().map(mapper::toDomain)
-                .toList();
+        return query.setFirstResult(page).setMaxResults(max).getResultList().stream()
+            .map(mapper::toDomain)
+            .toList();
     }
 }

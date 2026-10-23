@@ -1,11 +1,22 @@
 {
+  "editor.rulers": [
+    110
+  ],
+  "editor.formatOnSave": true,
+  "[java]": {
+    "editor.defaultFormatter": "redhat.java",
     "editor.tabSize": 4,
-    "editor.detectIndentation": false,
-    "search.exclude": {
-        "**/target/**": true
-    },
-    "files.watcherExclude": {
-        "**/target/**": true
-    },
-    "explorer.fileNesting.enabled": true
+    "editor.insertSpaces": true
+  },
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "java.format.settings.url": ".vscode/java-formatter.xml",
+  "java.format.settings.profile": "java",
+  "search.exclude": {
+    "**/target/**": true
+  },
+  "files.watcherExclude": {
+    "**/target/**": true
+  },
+  "explorer.fileNesting.enabled": true
 }
