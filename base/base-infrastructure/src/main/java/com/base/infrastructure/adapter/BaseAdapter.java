@@ -2,7 +2,9 @@ package com.base.infrastructure.adapter;
 
 import java.util.List;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 
 import com.base.domain.model.BaseDomain;
 import com.base.domain.port.out.IBaseRepositoryPortOut;
@@ -22,10 +24,15 @@ public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain>
 
     private final IBaseRepository<E> repository;
     private final BaseMapper<E, R> mapper;
+    private final Class<E> entityClass;
 
-    protected BaseAdapter(IBaseRepository<E> repository, BaseMapper<E, R> mapper) {
+    @PersistenceContext
+    private EntityManager em;
+
+    protected BaseAdapter(IBaseRepository<E> repository, BaseMapper<E, R> mapper, Class<E> entityClass) {
         this.repository = repository;
         this.mapper = mapper;
+        this.entityClass = entityClass;
     }
 
     @Override
@@ -74,7 +81,14 @@ public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain>
     }
 
     @Override
-    public List<R> constructQuery(Integer first, Integer max, String field, Object[] values) {
-        throw new UnsupportedOperationException("Unimplemented method 'constructQuery'");
+    @Transactional(readOnly = true)
+    public List<R> findBy(String sql, List<Object> values, Integer page, Integer max) {
+        var query = em.createQuery(sql, entityClass);
+        for (int i = 0; i < values.size(); i++) {
+            query.setParameter(i + 1, values.get(i));
+        }
+
+        return query.setFirstResult(page).setMaxResults(max).getResultList().stream().map(mapper::toDomain)
+                .toList();
     }
 }

@@ -41,6 +41,8 @@ spring:
       additional-paths:
         - ../auth/auth-domain/target/classes
         - ../auth/auth-infrastructure/target/classes
+        - ../base/base-domain/target/classes
+        - ../base/base-infrastructure/target/classes
 
 logging:
   level:

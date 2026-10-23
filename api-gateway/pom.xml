@@ -59,12 +59,21 @@
                     <excludeDevtools>false</excludeDevtools>
                     <additionalClasspathElements>
                         <additionalClasspathElement>
-                            ${project.basedir}/../auth/auth-domain/target/classes</additionalClasspathElement>
+                            ${project.basedir}/../auth/auth-domain/target/classes
+                        </additionalClasspathElement>
                         <additionalClasspathElement>
-                            ${project.basedir}/../auth/auth-infrastructure/target/classes</additionalClasspathElement>
+                            ${project.basedir}/../auth/auth-infrastructure/target/classes
+                        </additionalClasspathElement>
+                        <additionalClasspathElement>
+                            ${project.basedir}/../base/base-infrastructure/target/classes
+                        </additionalClasspathElement>
+                        <additionalClasspathElement>
+                            ${project.basedir}/../base/base-infrastructure/target/classes
+                        </additionalClasspathElement>
                     </additionalClasspathElements>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>

@@ -13,5 +13,5 @@ public interface IBaseRepositoryPortOut<R> {
 
     List<R> findByPage(Integer page, Integer max, String sort);
 
-    List<R> constructQuery(Integer first, Integer max, String field, Object[] values);
+    List<R> findBy(String sql, List<Object> values, Integer page, Integer max);
 }

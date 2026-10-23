@@ -1,5 +1,6 @@
 package com.base.infrastructure.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -7,10 +8,13 @@ import jakarta.persistence.EntityNotFoundException;
 import com.base.domain.model.BaseDomain;
 import com.base.domain.port.in.IBaseUseCase;
 import com.base.domain.usecase.BaseCrudUseCase;
+import com.base.infrastructure.utils.query.IQueryUtils;
+import com.base.infrastructure.utils.query.QueryUtils;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class BaseService<R extends BaseDomain> implements IBaseUseCase<R> {
+public abstract class BaseService<R extends BaseDomain> implements IBaseUseCase<R>, IQueryUtils {
 
     protected final BaseCrudUseCase<R> useCase;
 
@@ -57,12 +61,38 @@ public abstract class BaseService<R extends BaseDomain> implements IBaseUseCase<
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<R> findAll(Integer page, Integer max, String sort) {
         return useCase.findAll(page, max, sort);
     }
 
     @Override
-    public List<R> findBy(String fields, String values, Integer first, Integer max) {
-        throw new UnsupportedOperationException("Unimplemented method 'findBy'");
+    @Transactional(readOnly = true)
+    public List<R> findBy(String fields, List<Object> fieldsValues, Integer first, Integer max) {
+        // var userConnected = getUserConnected();
+        if (first == null) {
+            first = 0;
+        }
+        if (max == null) {
+            max = 100;
+        }
+
+        var endQuery = new StringBuilder();
+        var queryDtos = initQueryDto(endQuery, fields, fieldsValues.toArray());
+        var sqlQuery = getSqlQuery(queryDtos, false, endQuery);
+        var values = new ArrayList<Object>();
+        for (var i = 0; i < fieldsValues.size(); i++) {
+            var value = fieldsValues.get(i);
+            if (BooleanUtils.isTrue(queryDtos.get(i).getLike())) {
+                value = QueryUtils.getLike(value.toString());
+            } else if ("true".equals(value)) {
+                value = Boolean.TRUE;
+            } else if ("false".equals(value)) {
+                value = Boolean.FALSE;
+            }
+            values.add(value);
+        }
+
+        return useCase.findBy(sqlQuery, values, first, max);
     }
 }

@@ -35,9 +35,8 @@ public class EntityUtils {
                 var getterName = String.format("%s%s", "get", StringUtils.capitalize(field.getName()));
                 try {
                     value = entity2.getClass().getMethod(getterName).invoke(entity2);
-                } catch (IllegalAccessException | InvocationTargetException
-                        | NoSuchMethodException exception) {
-                    log.error("expcetion EntityUtils.setFields : " + getterName, exception);
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException _) {
+                    log.error("expcetion EntityUtils.setFields : " + getterName);
                 }
                 doSetValue(entity1, value, field, forceNull);
             }

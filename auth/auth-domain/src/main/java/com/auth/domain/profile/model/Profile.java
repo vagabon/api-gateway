@@ -14,7 +14,6 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class Profile extends BaseDomain {
-    private Long id;
     private String name;
     private String roles;
 

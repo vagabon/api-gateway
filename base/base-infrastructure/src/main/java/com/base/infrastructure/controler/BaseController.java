@@ -1,5 +1,6 @@
 package com.base.infrastructure.controler;
 
+import java.util.Arrays;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 public abstract class BaseController<R extends BaseDomain> {
 
@@ -32,6 +34,20 @@ public abstract class BaseController<R extends BaseDomain> {
     @GetMapping
     public ResponseEntity<List<R>> findAll() {
         var profiles = service.findAll(0, 500, "id");
+        return ResponseEntity.ok(profiles);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<R> findById(@PathVariable Long id) {
+        var profile = service.findById(id);
+        return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/findBy")
+    public ResponseEntity<List<R>> findBy(@RequestParam(defaultValue = "") String fields,
+            @RequestParam(defaultValue = "") String values, @RequestParam(required = false) Integer first,
+            @RequestParam(required = false) Integer max) {
+        var profiles = service.findBy(fields, Arrays.asList((Object[]) values.split(",")), first, max);
         return ResponseEntity.ok(profiles);
     }
 

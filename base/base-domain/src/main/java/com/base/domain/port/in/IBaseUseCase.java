@@ -36,5 +36,5 @@ public interface IBaseUseCase<R> {
 
     R findById(Long id);
 
-    List<R> findBy(String fields, String values, Integer first, Integer max);
+    List<R> findBy(String fields, List<Object> fieldsValues, Integer first, Integer max);
 }

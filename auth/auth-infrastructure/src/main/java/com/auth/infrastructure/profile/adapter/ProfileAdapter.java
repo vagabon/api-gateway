@@ -13,6 +13,6 @@ import org.springframework.stereotype.Component;
 public class ProfileAdapter extends BaseAdapter<ProfileEntity, Profile> implements IProfileRepositoryPort {
 
     public ProfileAdapter(ProfileRepository profileRepository, ProfileMapper profileMapper) {
-        super(profileRepository, profileMapper);
+        super(profileRepository, profileMapper, ProfileEntity.class);
     }
 }

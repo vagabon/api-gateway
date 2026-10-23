@@ -66,48 +66,7 @@ public abstract class BaseCrudUseCase<R extends BaseDomain> extends BaseUseCase 
     }
 
     @Override
-    public List<R> findBy(String fields, String values, Integer first, Integer max) {
-        // var userConnected = getUserConnected();
-        if (first == null) {
-            first = 0;
-        }
-        if (max == null) {
-            max = 100;
-        }
-        return repositoryPort.constructQuery(first, max, fields, values.split(","));
+    public List<R> findBy(String fields, List<Object> fieldsValues, Integer first, Integer max) {
+        return repositoryPort.findBy(fields, fieldsValues, first, max);
     }
-
-    // protected PageResponse<T> doAfterFindBy(U userConnected, PageResponse<T>
-    // response) {
-    // if (SecurityUtils.hasRole(userConnected, ADMIN)) {
-    // return response;
-    // }
-    // return toPage(response);
-    // }
-
-    // public PageResponse<T> toPage(PageResponse<T> response) {
-    // if (responseClass == null) {
-    // return response;
-    // }
-    // return MapperUtils.toPage(response, responseClass);
-    // }
-
-    // public Response search(U userEntity, StringBuilder hqlQuery, String fields,
-    // String values,
-    // Integer first, Integer max) {
-    // var valuesSplits = fields.split(">>");
-
-    // hqlQuery.append("AND e.active = true ");
-    // hqlQuery.append("ORDER BY e.").append(valuesSplits[1].replace("Desc", "
-    // desc"));
-
-    // var query = service.getRepository().find(hqlQuery.toString(),
-    // QueryUtils.getLike(values));
-    // query.page(Page.ofSize(max));
-    // var response = new PageResponse<>(first, query.pageCount(), query.count(),
-    // max,
-    // query.page(Page.of(first, max)).list());
-    // return responseOk(doAfterFindBy(userEntity, response));
-
-    // }
 }
