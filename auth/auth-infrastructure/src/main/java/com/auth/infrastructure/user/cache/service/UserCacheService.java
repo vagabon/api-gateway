@@ -5,6 +5,7 @@ import com.auth.infrastructure.user.cache.dto.CacheUser;
 import com.auth.infrastructure.user.user.adapter.UserAdapter;
 import com.base.domain.exception.MetierException;
 
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class UserCacheService {
 
     private final UserAdapter userAdapter;
+    private final CacheManager cacheManager;
 
     @Cacheable(cacheNames = "users", key = "#id", unless = "#result == null")
     @SuppressWarnings("null")
@@ -34,5 +36,9 @@ public class UserCacheService {
 
     @CacheEvict(cacheNames = "users", key = "#id")
     public void evict(Long id) {
+        var cache = cacheManager.getCache("users");
+        if (cache != null) {
+            cache.evict(id);
+        }
     }
 }

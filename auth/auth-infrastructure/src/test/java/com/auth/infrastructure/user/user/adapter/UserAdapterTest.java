@@ -54,4 +54,26 @@ class UserAdapterTest {
 
         assertThat(result).isNull();
     }
+
+    @Test
+    void findByUsername_returnsMappedUser_whenFound() {
+        var entity = new UserEntity();
+        var domain = new User();
+        when(repository.findByUsername("username")).thenReturn(Optional.of(entity));
+        when(mapper.toDomain(entity)).thenReturn(domain);
+
+        var result = adapter.findByUsername("username");
+
+        assertThat(result).isSameAs(domain);
+        verify(repository).findByUsername("username");
+    }
+
+    @Test
+    void findByUsername_returnsNull_whenNotFound() {
+        when(repository.findByUsername("unknown")).thenReturn(Optional.empty());
+
+        var result = adapter.findByUsername("unknown");
+
+        assertThat(result).isNull();
+    }
 }

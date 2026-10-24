@@ -9,14 +9,13 @@ import com.base.domain.port.in.IBaseUsecase;
 import com.base.domain.port.out.IBaseRepositoryPortOut;
 import com.base.domain.user.CurrentUser;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public abstract class BaseCrudUsecase<D extends BaseDomain, A extends IBaseRepositoryPortOut<D>>
     extends BaseUsecase implements IBaseUsecase<D> {
 
     protected final A adapter;
-
-    protected BaseCrudUsecase(A adapter) {
-        this.adapter = adapter;
-    }
 
     @Override
     public D create(CurrentUser userConnected, D domain) {

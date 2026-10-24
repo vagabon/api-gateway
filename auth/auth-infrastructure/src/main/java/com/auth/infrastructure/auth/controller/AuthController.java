@@ -4,6 +4,7 @@ import java.time.Duration;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import com.auth.domain.user.refresh.usercase.UserRefreshUsecase;
 import com.auth.infrastructure.auth.client.AuthGoogleClient;
 import com.auth.infrastructure.auth.config.AuthCookieConfig;
 import com.auth.infrastructure.auth.dto.request.AuthGoogleRequest;
@@ -14,7 +15,6 @@ import com.auth.infrastructure.auth.service.AuthService;
 import com.auth.infrastructure.auth.service.jwt.AuthJwtService;
 import com.auth.infrastructure.user.refresh.service.UserRefreshService;
 import com.base.domain.exception.MetierException;
-import com.base.infrastructure.exception.BaseExceptionHandler;
 import com.google.common.net.HttpHeaders;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -39,13 +39,16 @@ public class AuthController {
     private final UserRefreshService userRefreshService;
     private final String googleClientId;
 
+    private final int refreshTokenTtl;
+
     public AuthController(
         AuthGoogleClient authClient,
         AuthCookieConfig authCookieConfig,
         AuthService authService,
         UserRefreshService userRefreshService,
         AuthJwtService authJwtService,
-        @Value("${google.client-id}") String googleClientId) {
+        @Value("${google.client-id}") String googleClientId,
+        @Value("${jwt.refresh-ttl}") int refreshTokenTtl) {
 
         this.authClient = authClient;
         this.authCookieConfig = authCookieConfig;
@@ -53,6 +56,7 @@ public class AuthController {
         this.userRefreshService = userRefreshService;
         this.authJwtService = authJwtService;
         this.googleClientId = googleClientId;
+        this.refreshTokenTtl = refreshTokenTtl;
     }
 
     @PostMapping("/google-identity-connect")
@@ -72,10 +76,10 @@ public class AuthController {
         var user = authService.googleConnect(googleResponse);
         var useJwt = authJwtService.getJwtTokens(user);
 
-        var refreshToken = userRefreshService.generateUserRefresh(user);
+        var refreshToken = userRefreshService.generateUserRefresh(user, refreshTokenTtl);
 
         var cookie = authCookieConfig.create(
-            refreshToken, Duration.ofSeconds(userRefreshService.getRefreshTokenTtl()));
+            refreshToken, Duration.ofSeconds(refreshTokenTtl));
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, cookie.toString())
             .body(useJwt);
@@ -95,20 +99,21 @@ public class AuthController {
         @CookieValue(name = "${app.refresh-cookie.name}", required = false) String refreshToken,
         HttpServletRequest request) {
         if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new MetierException(BaseExceptionHandler.ERROR_REFRESH_TOKEN);
+            throw new MetierException(UserRefreshUsecase.ERROR_REFRESH_TOKEN);
         }
-        var user = userRefreshService.findUserByRefreshToken(refreshToken);
+        var user = userRefreshService.findByToken(refreshToken);
         if (user == null) {
-            throw new MetierException(BaseExceptionHandler.ERROR_REFRESH_TOKEN);
+            throw new MetierException(UserRefreshUsecase.ERROR_REFRESH_TOKEN);
         }
-        userRefreshService.deleteUserRefresh(refreshToken);
+        userRefreshService.deleteByToken(refreshToken);
 
-        var useJwt = authJwtService.getJwtTokens(user);
+        var useJwt = authJwtService.getJwtTokens(user.getUser());
 
-        var newRefreshToken = userRefreshService.generateUserRefresh(user);
+        var newRefreshToken = userRefreshService.generateUserRefresh(user.getUser(),
+            refreshTokenTtl);
 
         var cookie = authCookieConfig.create(
-            newRefreshToken, Duration.ofSeconds(userRefreshService.getRefreshTokenTtl()));
+            newRefreshToken, Duration.ofSeconds(refreshTokenTtl));
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, cookie.toString())
             .body(useJwt);

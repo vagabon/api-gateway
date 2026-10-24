@@ -7,8 +7,4 @@ public record CurrentUser(
     String username,
     String email,
     Set<String> roles) {
-
-    public boolean hasRole(String role) {
-        return roles.contains(role);
-    }
 }

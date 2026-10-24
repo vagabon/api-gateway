@@ -58,6 +58,8 @@ public class BaseExceptionHandler {
 
         if (ERROR_REFRESH_TOKEN.equals(message)) {
             httpStatus = HttpStatus.UNAUTHORIZED;
+        } else if ("Access Denied".equals(message)) {
+            httpStatus = HttpStatus.UNAUTHORIZED;
         } else {
             log.error("EXCEPTION : {}", targetedStack);
         }
