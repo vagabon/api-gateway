@@ -26,4 +26,10 @@ public class UserAdapter extends BaseAdapter<UserEntity, User, UserRepository>
             .orElse(null);
         return mapper.toDomain(userEntity);
     }
+
+    public User findByUsername(String username) {
+        var userEntity = userRepository.findByUsername(username)
+            .orElse(null);
+        return mapper.toDomain(userEntity);
+    }
 }

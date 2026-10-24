@@ -7,31 +7,34 @@ import jakarta.persistence.PersistenceContext;
 
 import com.base.domain.exception.MetierException;
 import com.base.domain.model.BaseDomain;
+import com.base.domain.model.PageResult;
 import com.base.domain.port.out.IBaseRepositoryPortOut;
 import com.base.infrastructure.mapper.BaseMapper;
 import com.base.infrastructure.persistence.entity.BaseEntity;
 import com.base.infrastructure.persistence.repository.IBaseRepository;
 import com.base.infrastructure.utils.EntityUtils;
 
+import org.hibernate.Session;
+import org.hibernate.query.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain, J extends IBaseRepository<E>>
-    implements IBaseRepositoryPortOut<R> {
+public abstract class BaseAdapter<E extends BaseEntity, D extends BaseDomain, R extends IBaseRepository<E>>
+    implements IBaseRepositoryPortOut<D> {
 
     private static final String NOT_FOUND = "ID not found : %d";
 
-    protected final J repository;
-    protected final BaseMapper<E, R> mapper;
+    protected final R repository;
+    protected final BaseMapper<E, D> mapper;
     private final Class<E> entityClass;
 
     @PersistenceContext
     private EntityManager em;
 
     protected BaseAdapter(
-        J repository,
-        BaseMapper<E, R> mapper,
+        R repository,
+        BaseMapper<E, D> mapper,
         Class<E> entityClass) {
         this.repository = repository;
         this.mapper = mapper;
@@ -40,7 +43,7 @@ public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain, J 
 
     @Override
     @Transactional
-    public R create(R domain) {
+    public D create(D domain) {
         var entity = mapper.toEntity(domain);
         repository.save(entity);
         return mapper.toDomain(entity);
@@ -48,7 +51,7 @@ public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain, J 
 
     @Override
     @Transactional
-    public R update(R domain) {
+    public D update(D domain) {
         var entity = mapper.toEntity(domain);
         var entityFromBdd = entityFindById(domain.getId());
         EntityUtils.setEntity(entityFromBdd, entity, false);
@@ -57,17 +60,17 @@ public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain, J 
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public R findById(Long id) {
+    @Transactional
+    public D delete(Long id) {
         var entity = entityFindById(id);
+        repository.delete(entity);
         return mapper.toDomain(entity);
     }
 
     @Override
-    @Transactional
-    public R delete(Long id) {
+    @Transactional(readOnly = true)
+    public D findById(Long id) {
         var entity = entityFindById(id);
-        repository.delete(entity);
         return mapper.toDomain(entity);
     }
 
@@ -78,21 +81,32 @@ public abstract class BaseAdapter<E extends BaseEntity, R extends BaseDomain, J 
 
     @Override
     @Transactional(readOnly = true)
-    public List<R> findByPage(Integer page, Integer max, String sort) {
+    public List<D> findByPage(Integer page, Integer max, String sort) {
         var pageable = PageRequest.of(page, max, Sort.by(Sort.Direction.ASC, sort));
         return repository.findAll(pageable).stream().map(mapper::toDomain).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<R> findBy(String sql, List<Object> values, Integer page, Integer max) {
-        var query = em.createQuery(sql, entityClass);
+    public PageResult<D> findBy(
+        String sql,
+        List<Object> values,
+        Integer page,
+        Integer max) {
+
+        var query = em.unwrap(Session.class).createSelectionQuery(sql, entityClass);
         for (int i = 0; i < values.size(); i++) {
             query.setParameter(i + 1, values.get(i));
         }
 
-        return query.setFirstResult(page).setMaxResults(max).getResultList().stream()
+        var total = query.getResultCount();
+        var content = query
+            .setPage(Page.page(max, page)).getResultList()
+            .stream()
             .map(mapper::toDomain)
             .toList();
+        var totalPages = (int) Math.ceil((double) total / max);
+
+        return new PageResult<>(page, totalPages, total, max, content);
     }
 }

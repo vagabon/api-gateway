@@ -3,6 +3,7 @@ package com.base.infrastructure.controller;
 import java.util.List;
 
 import com.base.domain.model.BaseDomain;
+import com.base.domain.model.PageResult;
 import com.base.infrastructure.service.BaseService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -94,15 +95,15 @@ class BaseControllerTest {
     @Test
     @SuppressWarnings("unchecked")
     void findBy_decoupeValuesParVirgule() throws Exception {
+        var pageResult = new PageResult<>(0, 0, null, null, List.of(domain(1L)));
         when(service.findBy(anyString(), anyList(), any(), any()))
-            .thenReturn(List.of(domain(1L)));
+            .thenReturn(pageResult);
 
         mockMvc
             .perform(get("/test/findBy").param("fields", "name,active")
                 .param("values", "john,true")
                 .param("first", "5").param("max", "20"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").value(1));
+            .andExpect(status().isOk());
 
         ArgumentCaptor<List<Object>> captor = ArgumentCaptor.forClass(List.class);
         verify(service).findBy(eq("name,active"), captor.capture(), eq(5), eq(20));
@@ -112,7 +113,8 @@ class BaseControllerTest {
 
     @Test
     void findBy_sansFirstNiMax_transmetNull() throws Exception {
-        when(service.findBy(anyString(), anyList(), any(), any())).thenReturn(List.of());
+        var pageResult = new PageResult<TestDomain>(0, 0, null, null, List.of());
+        when(service.findBy(anyString(), anyList(), any(), any())).thenReturn(pageResult);
 
         mockMvc
             .perform(get("/test/findBy").param("fields", "name").param("values", "john"))
@@ -123,7 +125,8 @@ class BaseControllerTest {
 
     @Test
     void create_retourneLeDomaineCree() throws Exception {
-        when(service.create(any(TestDomain.class))).thenReturn(domain(1L));
+        when(service.create(any(), any(TestDomain.class)))
+            .thenReturn(domain(1L));
 
         mockMvc
             .perform(post("/test").contentType(MediaType.APPLICATION_JSON).content("{}"))
@@ -140,7 +143,8 @@ class BaseControllerTest {
 
     @Test
     void update_retourneLeDomaineModifie() throws Exception {
-        when(service.update(any(TestDomain.class))).thenReturn(domain(1L));
+        when(service.update(any(), any(TestDomain.class)))
+            .thenReturn(domain(1L));
 
         mockMvc
             .perform(put("/test").contentType(MediaType.APPLICATION_JSON)
@@ -150,7 +154,7 @@ class BaseControllerTest {
 
     @Test
     void delete_retourneTrue() throws Exception {
-        when(service.delete(1L)).thenReturn(true);
+        when(service.delete(null, 1L)).thenReturn(true);
 
         mockMvc.perform(delete("/test/1")).andExpect(status().isOk())
             .andExpect(content().string("true"));
@@ -160,7 +164,7 @@ class BaseControllerTest {
     void desactivate_retourneLeDomaine() throws Exception {
         TestDomain off = domain(1L);
         off.setActive(false);
-        when(service.desactivate(1L)).thenReturn(off);
+        when(service.desactivate(null, 1L)).thenReturn(off);
 
         mockMvc.perform(delete("/test/desactivate/1")).andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1));

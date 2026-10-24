@@ -6,13 +6,14 @@ import java.util.List;
 
 import com.base.domain.exception.MetierException;
 import com.base.domain.model.BaseDomain;
+import com.base.domain.model.PageResult;
 import com.base.domain.port.out.IBaseRepositoryPortOut;
+import com.base.domain.user.CurrentUser;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -31,7 +32,6 @@ class BaseCrudUsecaseTest {
     static class TestDomain extends BaseDomain {
     }
 
-    // Sous-classe de test : enregistre l'appel des hooks
     static class TestUseCase
         extends BaseCrudUsecase<TestDomain, IBaseRepositoryPortOut<TestDomain>> {
         final List<String> calls = new ArrayList<>();
@@ -41,32 +41,32 @@ class BaseCrudUsecaseTest {
         }
 
         @Override
-        public void doBeforeCreate(TestDomain d) {
+        public void doBeforeCreate(CurrentUser user, TestDomain d) {
             calls.add("beforeCreate");
         }
 
         @Override
-        public void doAfterCreate(TestDomain d) {
+        public void doAfterCreate(CurrentUser user, TestDomain d) {
             calls.add("afterCreate");
         }
 
         @Override
-        public void doBeforeUpdate(TestDomain d) {
+        public void doBeforeUpdate(CurrentUser user, TestDomain d) {
             calls.add("beforeUpdate");
         }
 
         @Override
-        public void doAfterUpdate(TestDomain d) {
+        public void doAfterUpdate(CurrentUser user, TestDomain d) {
             calls.add("afterUpdate");
         }
 
         @Override
-        public void doBeforeDelete(TestDomain d) {
+        public void doBeforeDelete(CurrentUser user, TestDomain d) {
             calls.add("beforeDelete");
         }
 
         @Override
-        public void doAfterDelete(TestDomain d) {
+        public void doAfterDelete(CurrentUser user, TestDomain d) {
             calls.add("afterDelete");
         }
     }
@@ -82,36 +82,34 @@ class BaseCrudUsecaseTest {
     }
 
     private TestDomain domain(Long id) {
-        TestDomain d = new TestDomain();
+        var d = new TestDomain();
         d.setId(id);
         d.setActive(true);
         return d;
     }
 
-    // ---------- create ----------
-
     @Test
     void create_appelleHooksEtPort_dansLOrdre() {
-        TestDomain input = domain(null);
-        TestDomain saved = domain(1L);
+        var user = new CurrentUser(1L, "", "", null);
+        var input = domain(null);
+        var saved = domain(1L);
         when(port.create(input)).thenReturn(saved);
 
-        TestDomain result = useCase.create(input);
+        var result = useCase.create(user, input);
 
         assertThat(result).isSameAs(saved);
         assertThat(useCase.calls).containsExactly("beforeCreate", "afterCreate");
         verify(port).create(input);
     }
 
-    // ---------- update ----------
-
     @Test
     void update_appelleHooksEtPort() {
-        TestDomain input = domain(1L);
-        TestDomain updated = domain(1L);
+        var user = new CurrentUser(1L, "", "", null);
+        var input = domain(1L);
+        var updated = domain(1L);
         when(port.update(input)).thenReturn(updated);
 
-        TestDomain result = useCase.update(input);
+        var result = useCase.update(user, input);
 
         assertThat(result).isSameAs(updated);
         assertThat(useCase.calls).containsExactly("beforeUpdate", "afterUpdate");
@@ -119,56 +117,57 @@ class BaseCrudUsecaseTest {
 
     @Test
     void update_siLePortLeveUneException_neDeclenchePasAfterUpdate() {
-        TestDomain input = domain(1L);
+        var user = new CurrentUser(1L, "", "", null);
+        var input = domain(1L);
         when(port.update(input)).thenThrow(new IllegalStateException("boom"));
 
-        assertThatThrownBy(() -> useCase.update(input))
+        assertThatThrownBy(() -> useCase.update(user, input))
             .isInstanceOf(IllegalStateException.class);
 
         assertThat(useCase.calls).containsExactly("beforeUpdate");
     }
 
-    // ---------- delete ----------
-
     @Test
     void delete_chargeAvantDeSupprimer_etRetourneTrue() {
-        TestDomain before = domain(1L);
-        TestDomain deleted = domain(1L);
+        var user = new CurrentUser(1L, "", "", null);
+        var before = domain(1L);
+        var deleted = domain(1L);
         when(port.findById(1L)).thenReturn(before);
         when(port.delete(1L)).thenReturn(deleted);
 
-        boolean result = useCase.delete(1L);
+        var result = useCase.delete(user, 1L);
 
         assertThat(result).isTrue();
         assertThat(useCase.calls).containsExactly("beforeDelete", "afterDelete");
-        InOrder order = inOrder(port);
+        var order = inOrder(port);
         order.verify(port).findById(1L);
         order.verify(port).delete(1L);
     }
 
     @Test
     void delete_siIntrouvable_neSupprimeRien() {
+        var user = new CurrentUser(1L, "", "", null);
         when(port.findById(99L)).thenThrow(new MetierException("not found"));
 
-        assertThatThrownBy(() -> useCase.delete(99L))
+        assertThatThrownBy(() -> useCase.delete(user, 99L))
             .isInstanceOf(RuntimeException.class);
 
         verify(port, never()).delete(anyLong());
         assertThat(useCase.calls).isEmpty();
     }
 
-    // ---------- desactivate ----------
-
     @Test
     void desactivate_passeActiveAFalse_renseigneDeletedDate_sansSuppressionPhysique() {
-        TestDomain before = domain(1L);
+        var user = new CurrentUser(1L, "", "", null);
+        var before = domain(1L);
         when(port.findById(1L)).thenReturn(before);
         when(port.update(any(TestDomain.class))).thenAnswer(inv -> inv.getArgument(0));
-        Instant start = Instant.now();
 
-        TestDomain result = useCase.desactivate(1L);
+        var start = Instant.now();
+        var result = useCase.desactivate(user, 1L);
 
-        ArgumentCaptor<TestDomain> captor = ArgumentCaptor.forClass(TestDomain.class);
+        var captor = ArgumentCaptor.forClass(TestDomain.class);
+
         verify(port).update(captor.capture());
         assertThat(captor.getValue().getActive()).isFalse();
         assertThat(captor.getValue().getDeletedDate()).isAfterOrEqualTo(start);
@@ -177,11 +176,9 @@ class BaseCrudUsecaseTest {
         verify(port, never()).delete(anyLong());
     }
 
-    // ---------- lecture ----------
-
     @Test
     void findAll_deleguePagination() {
-        List<TestDomain> list = List.of(domain(1L), domain(2L));
+        var list = List.of(domain(1L), domain(2L));
         when(port.findByPage(0, 10, "name")).thenReturn(list);
 
         assertThat(useCase.findAll(0, 10, "name")).isEqualTo(list);
@@ -189,7 +186,7 @@ class BaseCrudUsecaseTest {
 
     @Test
     void findById_delegueAuPort() {
-        TestDomain found = domain(1L);
+        var found = domain(1L);
         when(port.findById(1L)).thenReturn(found);
 
         assertThat(useCase.findById(1L)).isSameAs(found);
@@ -198,10 +195,11 @@ class BaseCrudUsecaseTest {
     @Test
     void findBy_delegueAuPort() {
         List<Object> values = List.of("john");
-        List<TestDomain> list = List.of(domain(1L));
-        when(port.findBy("from X where name = ?1", values, 0, 10)).thenReturn(list);
+        var list = List.of(domain(1L));
+        var pageResult = new PageResult<TestDomain>(0, 0, null, null, list);
+        when(port.findBy("from X where name = ?1", values, 0, 10)).thenReturn(pageResult);
 
         assertThat(useCase.findBy("from X where name = ?1", values, 0, 10))
-            .isEqualTo(list);
+            .isEqualTo(pageResult);
     }
 }

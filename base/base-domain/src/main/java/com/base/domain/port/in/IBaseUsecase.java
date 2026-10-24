@@ -2,39 +2,46 @@ package com.base.domain.port.in;
 
 import java.util.List;
 
-public interface IBaseUsecase<R> {
+import com.base.domain.model.PageResult;
+import com.base.domain.user.CurrentUser;
+
+public interface IBaseUsecase<D> {
 
     String ping();
 
-    R create(R domain);
+    D create(CurrentUser userConnected, D domain);
 
-    default void doBeforeCreate(R domain) {
+    default void doBeforeCreate(CurrentUser userConnected, D domain) {
     }
 
-    default void doAfterCreate(R domain) {
+    default void doAfterCreate(CurrentUser userConnected, D domain) {
     }
 
-    R update(R domain);
+    D update(CurrentUser userConnected, D domain);
 
-    default void doBeforeUpdate(R domain) {
+    default void doBeforeUpdate(CurrentUser userConnected, D domain) {
     }
 
-    default void doAfterUpdate(R domain) {
+    default void doAfterUpdate(CurrentUser userConnected, D domain) {
     }
 
-    boolean delete(Long id);
+    boolean delete(CurrentUser userConnected, Long id);
 
-    R desactivate(Long id);
+    D desactivate(CurrentUser userConnected, Long id);
 
-    default void doBeforeDelete(R domain) {
+    default void doBeforeDelete(CurrentUser userConnected, D domain) {
     }
 
-    default void doAfterDelete(R domain) {
+    default void doAfterDelete(CurrentUser userConnected, D domain) {
     }
 
-    List<R> findAll(Integer page, Integer max, String sort);
+    List<D> findAll(Integer page, Integer max, String sort);
 
-    R findById(Long id);
+    D findById(Long id);
 
-    List<R> findBy(String fields, List<Object> fieldsValues, Integer first, Integer max);
+    PageResult<D> findBy(
+        String fields,
+        List<Object> fieldsValues,
+        Integer first,
+        Integer max);
 }

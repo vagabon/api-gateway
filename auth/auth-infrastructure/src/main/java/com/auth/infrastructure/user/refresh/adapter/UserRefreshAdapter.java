@@ -24,8 +24,7 @@ public class UserRefreshAdapter
 
     public UserRefresh findByToken(String token) {
         var userRefresh = repository
-            .findByTokenAndRevokedFalseAndExpiredDateAfter(token,
-                Instant.now())
+            .findByTokenAndRevokedFalseAndExpiredDateAfter(token, Instant.now())
             .orElse(null);
         return mapper.toDomain(userRefresh);
     }

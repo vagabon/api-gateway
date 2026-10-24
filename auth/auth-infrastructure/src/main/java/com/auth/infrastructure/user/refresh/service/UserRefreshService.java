@@ -12,6 +12,7 @@ import com.auth.domain.user.refresh.usercase.UserRefreshUsecase;
 import com.auth.domain.user.user.model.User;
 import com.auth.infrastructure.user.refresh.adapter.UserRefreshAdapter;
 import com.base.domain.exception.MetierException;
+import com.base.infrastructure.exception.BaseExceptionHandler;
 import com.base.infrastructure.service.BaseService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +24,6 @@ import lombok.Getter;
 
 @Service
 public class UserRefreshService extends BaseService<UserRefresh, UserRefreshUsecase> {
-    public static final String REFRESH_TOKEN_ERROR = "NO_REFRESH_TOKEN";
     private static final String ENCRYPT_ALGORITHM = "SHA-256";
 
     @Getter
@@ -38,6 +38,7 @@ public class UserRefreshService extends BaseService<UserRefresh, UserRefreshUsec
 
     @Transactional
     public String generateUserRefresh(User user) {
+        // TODO : mettre la logique dans le usecase
         var userRefresh = new UserRefresh();
         userRefresh.setUser(user);
         var raw = UUID.randomUUID().toString() + System.nanoTime();
@@ -49,7 +50,7 @@ public class UserRefreshService extends BaseService<UserRefresh, UserRefreshUsec
             userRefresh.setIpAddress(StringUtils.EMPTY);
             userRefresh.setRevoked(false);
             userRefresh.setExpiredDate(Instant.now().plusSeconds(refreshTokenTtl));
-            usecase.create(userRefresh);
+            usecase.create(null, userRefresh);
             return userRefresh.getToken();
         } catch (NoSuchAlgorithmException _) {
             throw new MetierException("REFRESH_HASH_ERROR");
@@ -64,7 +65,7 @@ public class UserRefreshService extends BaseService<UserRefresh, UserRefreshUsec
     public User findUserByRefreshToken(String refreshToken) {
         var userToken = usecase.findByToken(refreshToken);
         if (userToken == null) {
-            throw new MetierException(REFRESH_TOKEN_ERROR);
+            throw new MetierException(BaseExceptionHandler.ERROR_REFRESH_TOKEN);
         }
         return userToken.getUser();
     }

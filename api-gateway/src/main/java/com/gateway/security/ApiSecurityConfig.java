@@ -1,16 +1,19 @@
 package com.gateway.security;
 
+import java.util.Arrays;
 import java.util.List;
 
+import com.gateway.routes.ApiGatewayRouteConfig;
+import com.gateway.security.jwt.ApiGatewayJwtConfig;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -21,39 +24,48 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class ApiSecurityConfig {
 
+    private static final String CORS_REGISTER = "/**";
+    private static final String ENDPOINT_PERMIT = "/**";
+
+    private final String origins;
+    private final String allowedHeaders;
+    private final String allowedMethods;
+
+    public ApiSecurityConfig(
+        @Value("${app.cors.origins}") String origins,
+        @Value("${app.cors.allowed-headers}") String allowedHeaders,
+        @Value("${app.cors.allowed-methods}") String allowedMethods) {
+        this.origins = origins;
+        this.allowedHeaders = allowedHeaders;
+        this.allowedMethods = allowedMethods;
+    }
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    public SecurityFilterChain filterChain(
+        HttpSecurity http,
+        ApiGatewayJwtConfig converter,
+        ApiGatewayRouteConfig routeFilter) {
         return http
             .csrf(csrf -> csrf.disable()) // NOSONAR: API stateless with bearer
             .sessionManagement(
-                s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/**").permitAll()
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(ENDPOINT_PERMIT).permitAll()
                 .anyRequest().authenticated())
-            .oauth2ResourceServer(oauth -> oauth
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(converter())))
+            .oauth2ResourceServer(
+                oauth -> oauth.jwt(j -> j.jwtAuthenticationConverter(converter)))
             .build();
-    }
-
-    private JwtAuthenticationConverter converter() {
-        var authorities = new JwtGrantedAuthoritiesConverter();
-        authorities.setAuthoritiesClaimName("roles");
-        authorities.setAuthorityPrefix("ROLE_");
-        var converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(authorities);
-        return converter;
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedOrigins(List.of(origins));
+        config.setAllowedHeaders(List.of(allowedHeaders));
         config.setAllowedMethods(
-            List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+            Arrays.asList(allowedMethods.split(StringUtils.SPACE)));
         var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration(CORS_REGISTER, config);
         return source;
     }
 }

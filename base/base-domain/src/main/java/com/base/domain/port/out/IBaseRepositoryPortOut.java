@@ -2,16 +2,18 @@ package com.base.domain.port.out;
 
 import java.util.List;
 
-public interface IBaseRepositoryPortOut<R> {
-    R create(R domain);
+import com.base.domain.model.PageResult;
 
-    R update(R domain);
+public interface IBaseRepositoryPortOut<D> {
+    D create(D domain);
 
-    R findById(Long id);
+    D update(D domain);
 
-    R delete(Long id);
+    D findById(Long id);
 
-    List<R> findByPage(Integer page, Integer max, String sort);
+    D delete(Long id);
 
-    List<R> findBy(String sql, List<Object> values, Integer page, Integer max);
+    List<D> findByPage(Integer page, Integer max, String sort);
+
+    PageResult<D> findBy(String sql, List<Object> values, Integer page, Integer max);
 }

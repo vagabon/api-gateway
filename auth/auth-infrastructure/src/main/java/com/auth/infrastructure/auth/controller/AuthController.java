@@ -14,6 +14,7 @@ import com.auth.infrastructure.auth.service.AuthService;
 import com.auth.infrastructure.auth.service.jwt.AuthJwtService;
 import com.auth.infrastructure.user.refresh.service.UserRefreshService;
 import com.base.domain.exception.MetierException;
+import com.base.infrastructure.exception.BaseExceptionHandler;
 import com.google.common.net.HttpHeaders;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +31,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    public static final String REFRESH_TOKEN_ERROR = "NO_REFRESH_TOKEN";
 
     private final AuthGoogleClient authClient;
     private final AuthCookieConfig authCookieConfig;
@@ -95,11 +95,11 @@ public class AuthController {
         @CookieValue(name = "${app.refresh-cookie.name}", required = false) String refreshToken,
         HttpServletRequest request) {
         if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new MetierException(REFRESH_TOKEN_ERROR);
+            throw new MetierException(BaseExceptionHandler.ERROR_REFRESH_TOKEN);
         }
         var user = userRefreshService.findUserByRefreshToken(refreshToken);
         if (user == null) {
-            throw new MetierException(REFRESH_TOKEN_ERROR);
+            throw new MetierException(BaseExceptionHandler.ERROR_REFRESH_TOKEN);
         }
         userRefreshService.deleteUserRefresh(refreshToken);
 

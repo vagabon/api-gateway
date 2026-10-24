@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends IBaseRepository<UserEntity> {
     Optional<UserEntity> findByGoogleId(String googleId);
+
+    Optional<UserEntity> findByUsername(String username);
 }
