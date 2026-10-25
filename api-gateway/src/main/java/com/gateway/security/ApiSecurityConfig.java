@@ -25,7 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class ApiSecurityConfig {
 
     private static final String CORS_REGISTER = "/**";
-    private static final String ENDPOINT_PERMIT = "/auth/**";
+    private static final String ENDPOINT_PERMIT = "/auth/** /v1/auth/** /blog/**";
 
     private final String origins;
     private final String allowedHeaders;
@@ -51,7 +51,8 @@ public class ApiSecurityConfig {
             .sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(ENDPOINT_PERMIT).permitAll()
+                .requestMatchers(ENDPOINT_PERMIT.split(StringUtils.SPACE))
+                .permitAll()
                 .anyRequest().authenticated())
             .oauth2ResourceServer(
                 oauth -> oauth.jwt(j -> j.jwtAuthenticationConverter(converter)))
