@@ -12,10 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 public class BaseExceptionHandler {
     public static final String ERROR_REFRESH_TOKEN = "NO_REFRESH_TOKEN";
     public static final String ERROR_CONTRAINTS_VIOLATION = "ERRORS.CONTRAINTS_VIOLATION";
+    public static final String ERROR_RESSOURCE_ACCESS = "ERRORS.RESSOURCE_ACCESS : %s";
+    public static final String ERROR_ACCESS_DENIED = "Access Denied";
     private static final String METIER_EXCEPTION = "MetierException";
     private static final String PACKAGE = "com.";
     private static final String UNKNOWN = "unknown";
@@ -31,18 +34,23 @@ public class BaseExceptionHandler {
         var message = exception.getMessage();
         var endpoint = request != null ? request.getRequestURI() : UNKNOWN;
 
-        if (exception instanceof HttpClientErrorException clientEx
-            && clientEx.getStatusCode().value() == 404) {
+        if ((exception instanceof HttpClientErrorException clientEx
+            && clientEx.getStatusCode().value() == 404)) {
             log.error("Resource not found for endpoint : {} - message : {}", endpoint,
                 clientEx.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+        var httpStatus = HttpStatus.BAD_REQUEST;
+
         if (exception instanceof ConstraintViolationException) {
             message = ERROR_CONTRAINTS_VIOLATION;
         }
 
-        var httpStatus = HttpStatus.BAD_REQUEST;
+        if (exception instanceof ResourceAccessException) {
+            message = ERROR_RESSOURCE_ACCESS.formatted(endpoint);
+            httpStatus = HttpStatus.NOT_FOUND;
+        }
 
         String targetedStack;
         if (exception.getClass().getName().contains(METIER_EXCEPTION)) {
@@ -58,7 +66,7 @@ public class BaseExceptionHandler {
 
         if (ERROR_REFRESH_TOKEN.equals(message)) {
             httpStatus = HttpStatus.UNAUTHORIZED;
-        } else if ("Access Denied".equals(message)) {
+        } else if (ERROR_ACCESS_DENIED.equals(message)) {
             httpStatus = HttpStatus.UNAUTHORIZED;
         } else {
             log.error("EXCEPTION : {}", targetedStack);

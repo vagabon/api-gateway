@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/profile")
+@RequestMapping("/v1/roles")
 public class ProfileController extends BaseController<Profile> {
 
     public ProfileController(ProfileService profileService) {

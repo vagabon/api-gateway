@@ -44,25 +44,25 @@ class UserControllerTest {
     @Test
     void me_returnsUser_whenAuthenticated() throws Exception {
         var user = new User();
-        user.setUsername("gonz");
+        user.setUsername("vagabond");
         var profile = new Profile();
         profile.setName("USER");
         profile.setRoles("USER");
         user.setProfiles(Arrays.asList(profile));
         when(userService.findById(42L)).thenReturn(user);
 
-        mockMvc.perform(get("/user/me")
+        mockMvc.perform(get("/v1/users/me")
             .with(jwt().jwt(j -> j.subject("42"))
                 .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.username").value("gonz"));
+            .andExpect(jsonPath("$.username").value("vagabond"));
 
         verify(userService).findById(42L);
     }
 
     @Test
     void me_returns401_whenNoToken() throws Exception {
-        mockMvc.perform(get("/user/me"))
+        mockMvc.perform(get("/v1/users/me"))
             .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(userService);
@@ -72,7 +72,7 @@ class UserControllerTest {
     void findAll_returns200_withRoleUser() throws Exception {
         when(userService.findAll(0, 500, "id")).thenReturn(List.of(new User()));
 
-        mockMvc.perform(get("/user")
+        mockMvc.perform(get("/v1/users")
             .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER"))))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1));
@@ -80,14 +80,14 @@ class UserControllerTest {
 
     @Test
     void findAll_returns403_withoutRoleUser() throws Exception {
-        mockMvc.perform(get("/user")
+        mockMvc.perform(get("/v1/users")
             .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_OTHER"))))
             .andExpect(status().isForbidden());
     }
 
     @Test
     void findAll_returns401_whenNoToken() throws Exception {
-        mockMvc.perform(get("/user"))
+        mockMvc.perform(get("/v1/users"))
             .andExpect(status().isUnauthorized());
     }
 

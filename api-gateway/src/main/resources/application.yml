@@ -1,5 +1,7 @@
 server:
   port: 8080
+  servlet:
+    context-path: /
 
 spring:
   config:
@@ -52,6 +54,7 @@ spring:
               filters:
                 - StripPrefix=1
                 - RemoveRequestHeader=Authorization
+                - RemoveRequestHeader=Origin
 
   devtools:
     restart:
@@ -69,12 +72,15 @@ jwt:
   issuer: ${JWT_ISSUER:api-gateway}
   secret: ${JWT_SECRET}
   access-ttl: ${JWT_TTL:1m}
-  refresh-ttl: ${JWT_REFRESH_TTL:604800}
 
 app:
-  refresh-cookie.name: "refresh_token"
+  refresh-cookie:
+    name: ${REFRESH_COOKIE_NAME:refresh_token}
+    endpoint: ${REFRESH_COOKIE_ENDPOINT:/v1/auth/refresh-token}
+    ttl: ${JWT_REFRESH_TTL:604800}
+
   cors:
-    origins: ${CORS_ORIGINS:https://localhost:4200}
+    origins: ${CORS_ORIGINS:http://localhost:4200}
     allowed-headers: ${CORS_ALLOWED_HEADERS:*}
     allowed-methods: ${CORS_ALLOWED_METHODS:GET POST PUT PATCH DELETE OPTIONS}
 

@@ -8,23 +8,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthCookieConfig {
     private static final String STRICT = "Strict";
-    private static final String ENDPOINT = "/api/auth/refresh-token";
-    private static final String NAME = "refresh_token";
 
-    public ResponseCookie create(String refreshToken, Duration ttl) {
-        return ResponseCookie.from(NAME, refreshToken)
+    public ResponseCookie create(
+        String refreshTokenName,
+        String refreshTokenEndpoint,
+        String refreshToken,
+        Duration ttl) {
+        return ResponseCookie.from(refreshTokenName, refreshToken)
             .httpOnly(true)
             .secure(true)
             .sameSite(STRICT)
-            .path(ENDPOINT)
+            .path(refreshTokenEndpoint)
             .maxAge(ttl)
             .build();
     }
 
-    public ResponseCookie clear() {
-        return ResponseCookie.from(NAME, "")
+    public ResponseCookie clear(
+        String refreshTokenName,
+        String refreshTokenEndpoint) {
+        return ResponseCookie.from(refreshTokenName, "")
             .httpOnly(true).secure(true).sameSite(STRICT)
-            .path(ENDPOINT)
+            .path(refreshTokenEndpoint)
             .maxAge(0)
             .build();
     }

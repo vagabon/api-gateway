@@ -1,0 +1,24 @@
+services:
+  gateway:
+    container_name: gateway
+    build: docker
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./api-gateway/target/api-gateway-1.0.0-SNAPSHOT.jar:/app/app.jar:ro
+    networks:
+      - redis-net
+      - postgres-net
+
+networks:
+  redis-net:
+    external: true
+    name: redis-net
+  postgres-net:
+    external: true
+    name: postgres_postgres

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user-refresh")
+@RequestMapping("/v1/user-refreshs")
 public class UserRefreshController extends BaseController<UserRefresh> {
 
     public UserRefreshController(UserRefreshService userRefreshService) {

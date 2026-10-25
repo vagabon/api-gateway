@@ -3,7 +3,6 @@ package com.gateway.security;
 import java.util.Arrays;
 import java.util.List;
 
-import com.gateway.routes.ApiGatewayRouteConfig;
 import com.gateway.security.jwt.ApiGatewayJwtConfig;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,9 +42,9 @@ public class ApiSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(
         HttpSecurity http,
-        ApiGatewayJwtConfig converter,
-        ApiGatewayRouteConfig routeFilter) {
+        ApiGatewayJwtConfig converter) {
         return http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable()) // NOSONAR: API stateless with bearer
             .sessionManagement(
                 session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -64,6 +63,7 @@ public class ApiSecurityConfig {
         config.setAllowedHeaders(List.of(allowedHeaders));
         config.setAllowedMethods(
             Arrays.asList(allowedMethods.split(StringUtils.SPACE)));
+        config.setAllowCredentials(true);
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration(CORS_REGISTER, config);
         return source;

@@ -15,6 +15,7 @@ import com.auth.infrastructure.auth.dto.response.google.AuthGoogleResponse;
 import com.auth.infrastructure.auth.dto.response.jwt.AuthJwtResponse;
 import com.auth.infrastructure.auth.service.AuthService;
 import com.auth.infrastructure.auth.service.jwt.AuthJwtService;
+import com.auth.infrastructure.user.refresh.properties.UserRefreshProperties;
 import com.auth.infrastructure.user.refresh.service.UserRefreshService;
 import com.base.domain.exception.MetierException;
 import com.google.common.net.HttpHeaders;
@@ -48,7 +49,9 @@ import static org.mockito.Mockito.when;
 class AuthControllerTest {
 
     private static final String CLIENT_ID = "my-client-id";
-    private static final int TTL = 3600;
+    private static final String REFRESH_COOKIE_NAME = "refresh_cookie_name";
+    private static final String REFRESH_COOKIE_ENDPOINT = "refresh/cookie/endpoint";
+    private static final int REFRESH_COOKIE_TTL = 3600;
 
     @Mock
     private AuthGoogleClient authClient;
@@ -67,10 +70,14 @@ class AuthControllerTest {
 
     private AuthController controller;
 
+    private UserRefreshProperties refreshProperties = new UserRefreshProperties(
+        REFRESH_COOKIE_NAME, REFRESH_COOKIE_ENDPOINT,
+        REFRESH_COOKIE_TTL);
+
     @BeforeEach
     void setUp() {
         controller = new AuthController(authClient, authCookieConfig, authService,
-            userRefreshService, authJwtService, CLIENT_ID, TTL);
+            userRefreshService, authJwtService, CLIENT_ID, refreshProperties);
     }
 
     private AuthGoogleHttpResponse identity(String aud, boolean emailVerified) {
@@ -85,8 +92,9 @@ class AuthControllerTest {
     }
 
     private void stubCookie(String value, Duration ttl) {
-        when(authCookieConfig.create(value, ttl))
-            .thenReturn(ResponseCookie.from("refresh", value).build());
+        when(authCookieConfig.create(REFRESH_COOKIE_NAME,
+            REFRESH_COOKIE_ENDPOINT, value, ttl))
+                .thenReturn(ResponseCookie.from("refresh", value).build());
     }
 
     // ---------- google-identity-connect ----------
@@ -97,8 +105,9 @@ class AuthControllerTest {
         when(authClient.verifyIdToken("g-token")).thenReturn(identity);
         when(authService.googleConnect(any(AuthGoogleResponse.class))).thenReturn(user);
         when(authJwtService.getJwtTokens(user)).thenReturn(jwtResponse);
-        when(userRefreshService.generateUserRefresh(user, TTL)).thenReturn("refresh-1");
-        stubCookie("refresh-1", Duration.ofSeconds(TTL));
+        when(userRefreshService.generateUserRefresh(user, REFRESH_COOKIE_TTL))
+            .thenReturn("refresh-1");
+        stubCookie("refresh-1", Duration.ofSeconds(REFRESH_COOKIE_TTL));
 
         var response = controller.googleConnectIdentity(new AuthGoogleRequest("g-token"));
 
@@ -160,8 +169,9 @@ class AuthControllerTest {
         when(refresh.getUser()).thenReturn(user);
         when(userRefreshService.findByToken("old")).thenReturn(refresh);
         when(authJwtService.getJwtTokens(user)).thenReturn(jwtResponse);
-        when(userRefreshService.generateUserRefresh(user, TTL)).thenReturn("new");
-        stubCookie("new", Duration.ofSeconds(TTL));
+        when(userRefreshService.generateUserRefresh(user, REFRESH_COOKIE_TTL))
+            .thenReturn("new");
+        stubCookie("new", Duration.ofSeconds(REFRESH_COOKIE_TTL));
 
         var response = controller.refreshToken("old", mock(HttpServletRequest.class));
 
@@ -171,7 +181,7 @@ class AuthControllerTest {
 
         var order = inOrder(userRefreshService);
         order.verify(userRefreshService).deleteByToken("old");
-        order.verify(userRefreshService).generateUserRefresh(user, TTL);
+        order.verify(userRefreshService).generateUserRefresh(user, REFRESH_COOKIE_TTL);
     }
 
     @ParameterizedTest
@@ -204,7 +214,8 @@ class AuthControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getHeaders().getFirst(HttpHeaders.SET_COOKIE))
             .contains("refresh=");
-        verify(authCookieConfig).create("", Duration.ofSeconds(0));
+        verify(authCookieConfig).create(REFRESH_COOKIE_NAME,
+            REFRESH_COOKIE_ENDPOINT, "", Duration.ofSeconds(0));
     }
 
     private static void assertUnauthorized(ThrowingCallable call) {
