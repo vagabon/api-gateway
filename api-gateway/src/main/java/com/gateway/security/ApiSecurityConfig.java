@@ -3,6 +3,7 @@ package com.gateway.security;
 import java.util.Arrays;
 import java.util.List;
 
+import com.gateway.routes.ApiGatewayRouteConfig;
 import com.gateway.security.jwt.ApiGatewayJwtConfig;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class ApiSecurityConfig {
 
     private static final String CORS_REGISTER = "/**";
-    private static final String ENDPOINT_PERMIT = "/**";
+    private static final String ENDPOINT_PERMIT = "/auth/**";
 
     private final String origins;
     private final String allowedHeaders;
@@ -42,7 +43,8 @@ public class ApiSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(
         HttpSecurity http,
-        ApiGatewayJwtConfig converter) {
+        ApiGatewayJwtConfig converter,
+        ApiGatewayRouteConfig routeFilter) {
         return http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable()) // NOSONAR: API stateless with bearer
