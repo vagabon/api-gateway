@@ -45,7 +45,7 @@ public class AuthConfig {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(secretKey)
             .macAlgorithm(MacAlgorithm.HS256).build();
 
-        OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<Jwt>(
+        OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
             new JwtTimestampValidator(Duration.ZERO),
             new JwtIssuerValidator(issuer));
 
