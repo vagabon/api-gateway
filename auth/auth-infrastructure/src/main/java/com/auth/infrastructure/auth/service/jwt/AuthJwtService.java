@@ -37,17 +37,17 @@ public class AuthJwtService {
 
     public AuthJwtResponse getJwtTokens(User user) {
         return new AuthJwtResponse(user,
-            generate(user, accessTtl, ACCESS_TOKEN_TYPE));
+            generate(user, ACCESS_TOKEN_TYPE));
     }
 
     @SuppressWarnings("null")
-    private String generate(User user, Duration ttl, String type) {
+    private String generate(User user, String type) {
         var now = Instant.now();
         var claims = JwtClaimsSet.builder()
             .issuer(issuer)
             .subject(String.valueOf(user.getId()))
             .issuedAt(now)
-            .expiresAt(now.plus(ttl))
+            .expiresAt(now.plus(accessTtl))
             .id(UUID.randomUUID().toString())
             .claim(TYPE, type)
             .claim(ROLES, user.getProfiles().stream().map(Profile::getName).toList())
