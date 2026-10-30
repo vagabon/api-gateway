@@ -1,7 +1,9 @@
 package com.auth.infrastructure.user.cache.service;
 
+import java.util.stream.Collectors;
+
 import com.auth.domain.profile.model.Profile;
-import com.auth.infrastructure.user.cache.dto.CacheUser;
+import com.auth.infrastructure.user.cache.dto.UserCache;
 import com.auth.infrastructure.user.user.adapter.UserAdapter;
 import com.base.domain.exception.MetierException;
 
@@ -21,14 +23,15 @@ public class UserCacheService {
 
     @Cacheable(cacheNames = "users", key = "#id", unless = "#result == null")
     @SuppressWarnings("null")
-    public CacheUser getUser(Long id) {
+    public UserCache getUser(Long id) {
         try {
             var user = userAdapter.findById(id);
-            return new CacheUser(
+            return new UserCache(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getProfiles().stream().map(Profile::getName).toList());
+                user.getProfiles().stream().map(Profile::getName)
+                    .collect(Collectors.toSet()));
         } catch (MetierException _) {
             return null;
         }

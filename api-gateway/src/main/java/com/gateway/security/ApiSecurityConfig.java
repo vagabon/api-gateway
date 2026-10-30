@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.gateway.routes.ApiGatewayRouteConfig;
-import com.gateway.security.jwt.ApiGatewayJwtConfig;
+import com.gateway.security.jwt.ApiGatewayJwtConverter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +45,7 @@ public class ApiSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(
         HttpSecurity http,
-        ApiGatewayJwtConfig converter,
+        ApiGatewayJwtConverter converter,
         ApiGatewayRouteConfig routeFilter) {
         return http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))

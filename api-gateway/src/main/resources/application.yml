@@ -20,15 +20,16 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
 
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD}
+
+  mongodb:
+    uri: mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@${MONGO_HOST}/${MONGO_DB}?authSource=admin
 
   cache:
     type: redis
@@ -68,19 +69,18 @@ spring:
 google:
   client-id: ${GOOGLE_CLIENT_ID}
 
-jwt:
-  issuer: ${JWT_ISSUER:api-gateway}
-  secret: ${JWT_SECRET}
-  access-ttl: ${JWT_TTL:1m}
-
 app:
+  jwt:
+    issuer: ${JWT_ISSUER:api-gateway}
+    secret: ${JWT_SECRET}
+    access-ttl: ${JWT_TTL:1m}
   refresh-cookie:
     name: ${REFRESH_COOKIE_NAME:refresh_token}
-    endpoint: ${REFRESH_COOKIE_ENDPOINT:/v1/auth/refresh-token}
+    endpoint: ${REFRESH_COOKIE_ENDPOINT:/v1/auth}
     ttl: ${REFRESH_COOKIE_TTL:604800}
 
   endpoint:
-    permit: ${ENDPOINT_PERMIT:/auth/** /v1/auth/**}
+    permit: ${ENDPOINT_PERMIT:/v1/auth/**}
 
   cors:
     origins: ${CORS_ORIGINS:http://localhost:4200}

@@ -3,9 +3,9 @@ package com.auth.infrastructure.profile.adapter;
 import java.util.Optional;
 
 import com.auth.domain.profile.model.Profile;
+import com.auth.infrastructure.profile.jpa.entity.ProfileJpaEntity;
+import com.auth.infrastructure.profile.jpa.repository.ProfileJpaRepository;
 import com.auth.infrastructure.profile.mapper.ProfileMapper;
-import com.auth.infrastructure.profile.persistence.entity.ProfileEntity;
-import com.auth.infrastructure.profile.persistence.repository.ProfileRepository;
 import com.base.domain.exception.MetierException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class ProfileAdapterTest {
 
     @Mock
-    private ProfileRepository repository;
+    private ProfileJpaRepository repository;
 
     @Mock
     private ProfileMapper mapper;
@@ -43,7 +43,7 @@ class ProfileAdapterTest {
 
     @Test
     void getProfileUser_returnsMappedProfile_whenFound() {
-        var entity = new ProfileEntity();
+        var entity = new ProfileJpaEntity();
         var domain = new Profile();
         when(repository.findByName("USER")).thenReturn(Optional.of(entity));
         when(mapper.toDomain(entity)).thenReturn(domain);

@@ -1,35 +1,36 @@
 package com.auth.infrastructure.user.user.adapter;
 
 import com.auth.domain.user.user.model.User;
-import com.auth.domain.user.user.port.out.IUserAdapterPort;
+import com.auth.domain.user.user.port.UserRepositoryPort;
 import com.auth.infrastructure.user.user.mapper.UserMapper;
 import com.auth.infrastructure.user.user.persistence.entity.UserEntity;
 import com.auth.infrastructure.user.user.persistence.repository.UserRepository;
-import com.base.infrastructure.adapter.BaseAdapter;
+import com.base.infrastructure.adapter.BaseCrudAdapter;
 
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 @Component
-public class UserAdapter extends BaseAdapter<UserEntity, User, UserRepository>
-    implements IUserAdapterPort {
+@RequiredArgsConstructor
+public class UserAdapter extends BaseCrudAdapter<UserEntity, User>
+    implements UserRepositoryPort {
 
-    private final UserRepository userRepository;
-
-    public UserAdapter(UserRepository userRepository, UserMapper userMapper) {
-        super(userRepository, userMapper, UserEntity.class);
-        this.userRepository = userRepository;
-    }
+    @Getter
+    private final UserRepository repository;
+    @Getter
+    private final UserMapper mapper;
 
     @Override
     public User findByGoogleId(String googleId) {
-        var userEntity = userRepository.findByGoogleId(googleId)
+        var userEntity = repository.findByGoogleId(googleId)
             .orElse(null);
         return mapper.toDomain(userEntity);
     }
 
-    public User findByUsername(String username) {
-        var userEntity = userRepository.findByUsername(username)
-            .orElse(null);
-        return mapper.toDomain(userEntity);
+    @Override
+    public Class<UserEntity> getEntityClass() {
+        return UserEntity.class;
     }
 }

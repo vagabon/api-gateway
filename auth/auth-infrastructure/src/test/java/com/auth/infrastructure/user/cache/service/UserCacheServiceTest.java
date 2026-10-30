@@ -1,10 +1,11 @@
 package com.auth.infrastructure.user.cache.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.auth.domain.profile.model.Profile;
 import com.auth.domain.user.user.model.User;
-import com.auth.infrastructure.user.cache.dto.CacheUser;
+import com.auth.infrastructure.user.cache.dto.UserCache;
 import com.auth.infrastructure.user.user.adapter.UserAdapter;
 import com.base.domain.exception.MetierException;
 
@@ -46,15 +47,17 @@ class UserCacheServiceTest {
 
         var user = mock(User.class);
         when(user.getId()).thenReturn(1L);
-        when(user.getUsername()).thenReturn("gonz");
-        when(user.getEmail()).thenReturn("gonz@mail.com");
-        when(user.getProfiles()).thenReturn(List.of(admin, user1));
+        when(user.getUsername()).thenReturn("vagabond");
+        when(user.getEmail()).thenReturn("vagabond@mail.com");
+        when(user.getProfiles())
+            .thenReturn(List.of(admin, user1).stream().collect(Collectors.toSet()));
         when(userAdapter.findById(1L)).thenReturn(user);
 
         var result = service.getUser(1L);
 
         assertThat(result).isEqualTo(
-            new CacheUser(1L, "gonz", "gonz@mail.com", List.of("ADMIN", "USER")));
+            new UserCache(1L, "vagabond", "vagabond@mail.com",
+                List.of("ADMIN", "USER").stream().collect(Collectors.toSet())));
     }
 
     @Test

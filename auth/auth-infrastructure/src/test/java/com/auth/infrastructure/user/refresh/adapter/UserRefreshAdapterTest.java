@@ -4,9 +4,9 @@ import java.time.Instant;
 import java.util.Optional;
 
 import com.auth.domain.user.refresh.model.UserRefresh;
+import com.auth.infrastructure.user.refresh.jpa.entity.UserRefreshJpaEntity;
+import com.auth.infrastructure.user.refresh.jpa.repository.UserRefreshJpaRepository;
 import com.auth.infrastructure.user.refresh.mapper.UserRefreshMapper;
-import com.auth.infrastructure.user.refresh.persistence.entity.UserRefreshEntity;
-import com.auth.infrastructure.user.refresh.persistence.repository.UserRefreshRepository;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 class UserRefreshAdapterTest {
 
     @Mock
-    private UserRefreshRepository repository;
+    private UserRefreshJpaRepository repository;
 
     @Mock
     private UserRefreshMapper mapper;
@@ -39,7 +39,7 @@ class UserRefreshAdapterTest {
 
     @Test
     void findByToken_returnsMappedDomainWhenFound() {
-        var entity = new UserRefreshEntity();
+        var entity = new UserRefreshJpaEntity();
         var domain = new UserRefresh();
         when(repository.findByTokenAndRevokedFalseAndExpiredDateAfter(
             eq("abc"), any(Instant.class))).thenReturn(Optional.of(entity));

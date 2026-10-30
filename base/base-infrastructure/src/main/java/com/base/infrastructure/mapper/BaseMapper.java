@@ -1,8 +1,10 @@
 package com.base.infrastructure.mapper;
 
-public interface BaseMapper<E, D> {
+import com.base.domain.model.BaseIdDomain;
+import com.base.infrastructure.jpa.entity.BaseIdJpaEntity;
+
+public interface BaseMapper<E extends BaseIdJpaEntity, D extends BaseIdDomain> {
     D toDomain(E entity);
 
-    E toEntity(D domain);
-
+    E toJpaEntity(D domain);
 }

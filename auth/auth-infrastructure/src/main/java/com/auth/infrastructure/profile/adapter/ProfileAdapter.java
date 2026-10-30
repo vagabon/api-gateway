@@ -1,30 +1,40 @@
 package com.auth.infrastructure.profile.adapter;
 
 import com.auth.domain.profile.model.Profile;
-import com.auth.domain.profile.port.outbound.IProfileRepositoryPort;
+import com.auth.domain.profile.port.ProfileRepositoryPort;
+import com.auth.infrastructure.profile.jpa.entity.ProfileJpaEntity;
+import com.auth.infrastructure.profile.jpa.repository.ProfileJpaRepository;
 import com.auth.infrastructure.profile.mapper.ProfileMapper;
-import com.auth.infrastructure.profile.persistence.entity.ProfileEntity;
-import com.auth.infrastructure.profile.persistence.repository.ProfileRepository;
 import com.base.domain.exception.MetierException;
-import com.base.infrastructure.adapter.BaseAdapter;
+import com.base.infrastructure.adapter.BaseCrudAdapter;
 
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 @Component
-public class ProfileAdapter extends BaseAdapter<ProfileEntity, Profile, ProfileRepository>
-    implements IProfileRepositoryPort {
+@RequiredArgsConstructor
+public class ProfileAdapter
+    extends BaseCrudAdapter<ProfileJpaEntity, Profile>
+    implements ProfileRepositoryPort {
 
     private static final String USER_PROFILE = "USER";
 
-    public ProfileAdapter(
-        ProfileRepository profileRepository,
-        ProfileMapper profileMapper) {
-        super(profileRepository, profileMapper, ProfileEntity.class);
-    }
+    @Getter
+    private final ProfileJpaRepository repository;
+    @Getter
+    private final ProfileMapper mapper;
 
+    @Override
     public Profile getProfileUser() {
         return repository.findByName(USER_PROFILE)
             .map(mapper::toDomain).orElseThrow(() -> new MetierException(
                 "PROFILE %s not found".formatted(USER_PROFILE)));
+    }
+
+    @Override
+    public Class<ProfileJpaEntity> getEntityClass() {
+        return ProfileJpaEntity.class;
     }
 }

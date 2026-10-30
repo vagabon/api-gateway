@@ -2,7 +2,7 @@ package com.base.infrastructure.utils;
 
 import java.time.Instant;
 
-import com.base.infrastructure.persistence.entity.BaseEntity;
+import com.base.infrastructure.jpa.entity.BaseCrudJpaEntity;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class EntityUtilsTest {
 
     @Getter
     @Setter
-    class Entity extends BaseEntity {
+    class Entity extends BaseCrudJpaEntity {
         public String name;
         public String username;
         public Instant myDate;
@@ -59,7 +59,7 @@ class EntityUtilsTest {
 
     @Getter
     @Setter
-    class Entity2 extends BaseEntity {
+    class Entity2 extends BaseCrudJpaEntity {
         public String name;
     }
 

@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.auth.infrastructure.user.cache.service.UserCacheService;
-import com.gateway.routes.header.ApiGatewayRouteHeaderConfig;
+import com.gateway.routes.header.ApiGatewayRouteHeader;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -62,7 +62,7 @@ public class ApiGatewayRouteConfig extends OncePerRequestFilter {
                 log.error(ERROR_JWT, e.getMessage());
             }
         }
-        chain.doFilter(new ApiGatewayRouteHeaderConfig(request, headers), response);
+        chain.doFilter(new ApiGatewayRouteHeader(request, headers), response);
     }
 
 }

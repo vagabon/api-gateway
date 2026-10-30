@@ -1,55 +1,60 @@
 package com.auth.infrastructure.auth.config;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import com.auth.application.auth.AuthenticateRefreshUsecase;
+import com.auth.application.auth.AuthenticateUsecase;
+import com.auth.application.auth.GoogleConnectUsecase;
+import com.auth.application.auth.LogoutUsecase;
+import com.auth.application.user.refresh.CreateUserRefreshUsecase;
+import com.auth.application.user.refresh.DeleteUserRefreshByTokenUsecase;
+import com.auth.application.user.refresh.FindUserRefreshByTokenUsecase;
+import com.auth.application.user.user.CreateUserWithGoogleUsecase;
+import com.auth.infrastructure.auth.adapter.AuthCookieAdapter;
+import com.auth.infrastructure.auth.adapter.AuthJwtAdapter;
+import com.auth.infrastructure.auth.api.client.AuthGoogleClient;
+import com.auth.infrastructure.user.user.adapter.UserAdapter;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
-import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
-import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.stereotype.Component;
 
-@Configuration
+import lombok.RequiredArgsConstructor;
+
+@Component
+@RequiredArgsConstructor
 public class AuthConfig {
+    private final UserAdapter userAdapter;
+    private final AuthJwtAdapter authJwtAdapter;
+    private final AuthCookieAdapter authCookieAdapter;
+    private final AuthGoogleClient authGoogleclient;
 
-    private static final String ALGORITHM = "HmacSHA256";
+    private final CreateUserWithGoogleUsecase createUserWithGoogleUsecase;
+    private final CreateUserRefreshUsecase createUserRefreshUsecase;
+    private final DeleteUserRefreshByTokenUsecase deleteUserRefreshByTokenUsecase;
+
+    private final FindUserRefreshByTokenUsecase findUserRefreshByTokenUsecase;
 
     @Bean
-    public SecretKey jwtKey(@Value("${jwt.secret}") String secret) {
-        return new SecretKeySpec(
-            secret.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+    public GoogleConnectUsecase googleConnectUsecase() {
+        return new GoogleConnectUsecase(authGoogleclient);
     }
 
     @Bean
-    public JwtEncoder jwtEncoder(SecretKey jwtKey) {
-        return new NimbusJwtEncoder(new ImmutableSecret<>(jwtKey));
+    public AuthenticateUsecase authenticateUsecase() {
+        return new AuthenticateUsecase(userAdapter, authJwtAdapter, authCookieAdapter,
+            createUserWithGoogleUsecase,
+            createUserRefreshUsecase);
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(
-        @Value("${jwt.issuer}") String issuer,
-        SecretKey secretKey) {
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(secretKey)
-            .macAlgorithm(MacAlgorithm.HS256).build();
+    public AuthenticateRefreshUsecase authenticateRefreshUsecase() {
+        return new AuthenticateRefreshUsecase(userAdapter, authJwtAdapter,
+            authCookieAdapter,
+            findUserRefreshByTokenUsecase,
+            deleteUserRefreshByTokenUsecase,
+            createUserRefreshUsecase);
+    }
 
-        OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
-            new JwtTimestampValidator(Duration.ZERO),
-            new JwtIssuerValidator(issuer));
-
-        decoder.setJwtValidator(validator);
-        return decoder;
+    @Bean
+    public LogoutUsecase logoutUsecase() {
+        return new LogoutUsecase(authCookieAdapter, deleteUserRefreshByTokenUsecase);
     }
 }

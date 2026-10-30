@@ -1,17 +1,18 @@
 package com.auth.infrastructure.user.user.persistence.entity;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
-import com.auth.infrastructure.profile.persistence.entity.ProfileEntity;
-import com.base.infrastructure.persistence.entity.BaseEntity;
+import com.auth.infrastructure.profile.jpa.entity.ProfileJpaEntity;
+import com.base.infrastructure.jpa.entity.BaseCrudJpaEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -28,7 +29,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class UserEntity extends BaseEntity {
+public class UserEntity extends BaseCrudJpaEntity {
 
     private String username;
 
@@ -40,8 +41,8 @@ public class UserEntity extends BaseEntity {
 
     private Instant lastConnexionDate;
 
-    @ManyToMany()
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_profile", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "profile_id"))
-    private List<ProfileEntity> profiles;
+    private Set<ProfileJpaEntity> profiles;
 
 }

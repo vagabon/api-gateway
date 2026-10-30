@@ -19,6 +19,7 @@
   <modules>
     <module>base</module>
     <module>api-gateway</module>
+    <module>cache</module>
     <module>auth</module>
   </modules>
 
@@ -35,7 +36,7 @@
     <sonar.sources>src/main/java</sonar.sources>
     <sonar.tests>src/test/java</sonar.tests>
     <sonar.coverage.exclusions>
-      **/*Application.java,**/*Config.java,**/domain/**/model/*.java,**/domain/**/port/**/*.java
+      **/*Application.java,**/*Config.java
     </sonar.coverage.exclusions>
   </properties>
 
