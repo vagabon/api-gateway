@@ -2,9 +2,9 @@ package com.auth.infrastructure.user.user.adapter;
 
 import com.auth.domain.user.user.model.User;
 import com.auth.domain.user.user.port.UserRepositoryPort;
+import com.auth.infrastructure.user.user.jpa.entity.UserJpaEntity;
+import com.auth.infrastructure.user.user.jpa.repository.UserJpaRepository;
 import com.auth.infrastructure.user.user.mapper.UserMapper;
-import com.auth.infrastructure.user.user.persistence.entity.UserEntity;
-import com.auth.infrastructure.user.user.persistence.repository.UserRepository;
 import com.base.infrastructure.adapter.BaseCrudAdapter;
 
 import org.springframework.stereotype.Component;
@@ -14,11 +14,11 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class UserAdapter extends BaseCrudAdapter<UserEntity, User>
+public class UserAdapter extends BaseCrudAdapter<UserJpaEntity, User>
     implements UserRepositoryPort {
 
     @Getter
-    private final UserRepository repository;
+    private final UserJpaRepository repository;
     @Getter
     private final UserMapper mapper;
 
@@ -30,7 +30,7 @@ public class UserAdapter extends BaseCrudAdapter<UserEntity, User>
     }
 
     @Override
-    public Class<UserEntity> getEntityClass() {
-        return UserEntity.class;
+    public Class<UserJpaEntity> getEntityClass() {
+        return UserJpaEntity.class;
     }
 }

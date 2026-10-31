@@ -17,11 +17,9 @@ import lombok.ToString;
 public class UserRefresh extends BaseCrudDomain {
 
     private String token;
-
+    private String origin;
     private String ipAddress;
-
     private Boolean revoked;
-
     private Instant expiredDate;
 
     private User user;

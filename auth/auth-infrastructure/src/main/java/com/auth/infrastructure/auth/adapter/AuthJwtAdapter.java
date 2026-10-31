@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.auth.domain.auth.port.AuthJwtRepositoryPort;
-import com.auth.domain.profile.model.Profile;
+import com.auth.domain.role.model.Role;
 import com.auth.domain.user.user.model.User;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +37,7 @@ public class AuthJwtAdapter implements AuthJwtRepositoryPort {
     }
 
     @Override
-    public String generateTokenJwt(User user) {
+    public String generateTokenJwt(User user, String origin) {
 
         var now = Instant.now();
 
@@ -49,7 +49,9 @@ public class AuthJwtAdapter implements AuthJwtRepositoryPort {
             .expiresAt(now.plus(accessTtl))
             .id(UUID.randomUUID().toString())
             .claim(TYPE, ACCESS_TOKEN_TYPE)
-            .claim(ROLES, user.getProfiles().stream().map(Profile::getName).toList())
+            .claim(ROLES,
+                user.getRoles().stream().filter(role -> role.getOrigin().equals(origin))
+                    .map(Role::getRoleName).toList())
             .build();
 
         var header = JwsHeader.with(MacAlgorithm.HS256).build();

@@ -6,6 +6,7 @@ import com.auth.application.auth.AuthenticateRefreshUsecase;
 import com.auth.application.auth.AuthenticateUsecase;
 import com.auth.application.auth.GoogleConnectUsecase;
 import com.auth.application.auth.LogoutUsecase;
+import com.auth.application.user.user.CachedUserUsecase;
 import com.auth.exposition.rest.auth.request.AuthGoogleRequest;
 import com.auth.exposition.rest.auth.response.AuthJwtResponse;
 import com.base.infrastructure.controller.BaseController;
@@ -28,15 +29,21 @@ public class AuthRestController extends BaseController {
     private final GoogleConnectUsecase googleConnectUsecase;
     private final AuthenticateUsecase authenticateUsecase;
     private final AuthenticateRefreshUsecase authenticateRefreshUsecase;
+    private final CachedUserUsecase cachedUserUsecase;
     private final LogoutUsecase logoutUsecase;
 
     @PostMapping("/google-identity-connect")
     public ResponseEntity<AuthJwtResponse> googleConnectIdentity(
-        @RequestBody AuthGoogleRequest googleRequest) {
+        @RequestBody AuthGoogleRequest googleRequest,
+        HttpServletRequest request) {
 
         var googleResponse = googleConnectUsecase.execute(googleRequest.googleToken());
 
-        var authIdentity = authenticateUsecase.execute(googleResponse);
+        var authIdentity = authenticateUsecase.execute(googleResponse,
+            request.getHeader(HttpHeaders.ORIGIN),
+            request.getRemoteAddr());
+
+        cachedUserUsecase.execute(authIdentity.user());
 
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authIdentity.cookie().toString())
@@ -48,7 +55,11 @@ public class AuthRestController extends BaseController {
         @CookieValue(name = "${app.refresh-cookie.name}", required = false) String refreshToken,
         HttpServletRequest request) {
 
-        var authIdentity = authenticateRefreshUsecase.execute(refreshToken);
+        var authIdentity = authenticateRefreshUsecase.execute(refreshToken,
+            request.getHeader(HttpHeaders.ORIGIN),
+            request.getRemoteAddr());
+
+        cachedUserUsecase.execute(authIdentity.user());
 
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authIdentity.cookie().toString())
@@ -57,7 +68,7 @@ public class AuthRestController extends BaseController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
-        @CookieValue(name = "${app.refresh-cookie.name}", required = true) String refreshToken) {
+        @CookieValue(name = "${app.refresh-cookie.name}", required = false) String refreshToken) {
 
         var cookie = logoutUsecase.execute(refreshToken);
 

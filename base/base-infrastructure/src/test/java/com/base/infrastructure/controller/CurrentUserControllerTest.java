@@ -27,7 +27,8 @@ class CurrentUserControllerTest {
 
     @Test
     void getCurrentUser_shouldReturnPrincipal_whenPrincipalIsCurrentUser() {
-        var user = new CurrentUser(42L, "gonz", "gonz@example.com", Set.of("USER"));
+        var user = new CurrentUser(42L, "vagabond", "vagabond@example.com",
+            Set.of("USER"));
         SecurityContextHolder.getContext().setAuthentication(
             new UsernamePasswordAuthenticationToken(user, null,
                 List.of(new SimpleGrantedAuthority("ROLE_USER"))));

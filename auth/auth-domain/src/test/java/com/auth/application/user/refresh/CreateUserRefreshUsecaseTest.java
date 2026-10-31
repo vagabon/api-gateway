@@ -26,19 +26,23 @@ class CreateUserRefreshUsecaseTest {
     @InjectMocks
     CreateUserRefreshUsecase usecase;
 
+    private final String origin = "http://localhost:4200";
+    private final String ipAdress = "127.0.0.1";
+
     @Test
     void execute_shouldPersistRefreshWithExpectedFields() {
         var user = new User();
         var before = Instant.now();
 
-        var token = usecase.execute(user, TTL);
+        var token = usecase.execute(user, origin, ipAdress, TTL);
 
         var captor = ArgumentCaptor.forClass(UserRefresh.class);
         verify(userRefreshRepository).create(captor.capture());
         var saved = captor.getValue();
         assertThat(saved.getUser()).isSameAs(user);
         assertThat(saved.getToken()).isEqualTo(token);
-        assertThat(saved.getIpAddress()).isEmpty();
+        assertThat(saved.getOrigin()).isEqualTo(origin);
+        assertThat(saved.getIpAddress()).isEqualTo(ipAdress);
         assertThat(saved.getRevoked()).isFalse();
         assertThat(saved.getExpiredDate())
             .isBetween(before.plusSeconds(TTL), Instant.now().plusSeconds(TTL));
@@ -46,15 +50,15 @@ class CreateUserRefreshUsecaseTest {
 
     @Test
     void execute_shouldReturnNonBlankToken() {
-        var token = usecase.execute(new User(), TTL);
+        var token = usecase.execute(new User(), origin, ipAdress, TTL);
 
         assertThat(token).isNotBlank();
     }
 
     @Test
     void execute_shouldGenerateDistinctTokensOnEachCall() {
-        var first = usecase.execute(new User(), TTL);
-        var second = usecase.execute(new User(), TTL);
+        var first = usecase.execute(new User(), origin, ipAdress, TTL);
+        var second = usecase.execute(new User(), origin, ipAdress, TTL);
 
         assertThat(first).isNotEqualTo(second);
     }

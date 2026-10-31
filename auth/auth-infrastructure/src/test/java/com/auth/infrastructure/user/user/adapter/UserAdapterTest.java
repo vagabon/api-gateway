@@ -3,9 +3,9 @@ package com.auth.infrastructure.user.user.adapter;
 import java.util.Optional;
 
 import com.auth.domain.user.user.model.User;
+import com.auth.infrastructure.user.user.jpa.entity.UserJpaEntity;
+import com.auth.infrastructure.user.user.jpa.repository.UserJpaRepository;
 import com.auth.infrastructure.user.user.mapper.UserMapper;
-import com.auth.infrastructure.user.user.persistence.entity.UserEntity;
-import com.auth.infrastructure.user.user.persistence.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class UserAdapterTest {
 
     @Mock
-    private UserRepository repository;
+    private UserJpaRepository repository;
 
     @Mock
     private UserMapper mapper;
@@ -35,7 +35,7 @@ class UserAdapterTest {
 
     @Test
     void findByGoogleId_returnsMappedUser_whenFound() {
-        var entity = new UserEntity();
+        var entity = new UserJpaEntity();
         var domain = new User();
         when(repository.findByGoogleId("g-123")).thenReturn(Optional.of(entity));
         when(mapper.toDomain(entity)).thenReturn(domain);

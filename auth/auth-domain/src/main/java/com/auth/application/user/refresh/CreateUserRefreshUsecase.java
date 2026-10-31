@@ -14,12 +14,12 @@ public class CreateUserRefreshUsecase {
 
     private final UserRefreshRepositoryPort userRefreshrepository;
 
-    public String execute(User user, int ttl) {
+    public String execute(User user, String origin, String ipAdress, int ttl) {
         var userRefresh = new UserRefresh();
         userRefresh.setUser(user);
-        var refreshToken = UserRefreshUtils.generateRefreshToken();
-        userRefresh.setToken(refreshToken);
-        userRefresh.setIpAddress("");
+        userRefresh.setOrigin(origin);
+        userRefresh.setToken(UserRefreshUtils.generateRefreshToken());
+        userRefresh.setIpAddress(ipAdress);
         userRefresh.setRevoked(false);
         userRefresh.setExpiredDate(Instant.now().plusSeconds(ttl));
         userRefreshrepository.create(userRefresh);

@@ -9,9 +9,7 @@ import com.base.infrastructure.jpa.repository.BaseJpaRepository;
 public interface UserRefreshJpaRepository
     extends BaseJpaRepository<UserRefreshJpaEntity> {
 
-    Optional<UserRefreshJpaEntity> findByTokenAndRevokedFalseAndExpiredDateAfter(
-        String token,
-        Instant now);
+    Optional<UserRefreshJpaEntity> findByTokenAndOrigin(String token, String origin);
 
     long deleteByToken(String token);
 

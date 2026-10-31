@@ -2,8 +2,9 @@ package com.auth.domain.user.user.model;
 
 import java.time.Instant;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.auth.domain.profile.model.Profile;
+import com.auth.domain.role.model.Role;
 import com.base.domain.model.BaseCrudDomain;
 
 import lombok.EqualsAndHashCode;
@@ -21,7 +22,7 @@ public class User extends BaseCrudDomain {
     String avatar;
     String googleId;
     Instant lastConnexionDate;
-    Set<Profile> profiles;
+    Set<Role> roles;
 
     public void updateUserAvatar(String avatar) {
         setAvatar(avatar);
@@ -30,5 +31,10 @@ public class User extends BaseCrudDomain {
 
     public void updateLastConnexion() {
         setLastConnexionDate(Instant.now());
+    }
+
+    public Set<Role> getRolesFromOrigin(String origin) {
+        return roles.stream().filter(role -> role.getOrigin().equals(origin))
+            .collect(Collectors.toSet());
     }
 }

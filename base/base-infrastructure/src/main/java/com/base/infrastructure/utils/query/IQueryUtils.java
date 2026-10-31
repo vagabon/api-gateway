@@ -1,6 +1,5 @@
 package com.base.infrastructure.utils.query;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,7 +35,10 @@ public interface IQueryUtils {
     String CONDITATION_OR = "|";
     String FORCE_UPPER = "#";
 
-    default List<QueryUtilsDto> initQueryDto(StringBuilder endQuery, String fields, Object... values) {
+    default List<QueryUtilsDto> initQueryDto(
+        StringBuilder endQuery,
+        String fields,
+        Object... values) {
         var queryDtos = new LinkedList<QueryUtilsDto>();
         var fieldsDecompose = fields;
         var split = fieldsDecompose.split("<<");
@@ -47,10 +49,11 @@ public interface IQueryUtils {
         split = fieldsDecompose.split(">>");
         if (split.length > 1) {
             fieldsDecompose = split[0];
-            var order = split[1].endsWith("Desc") ? split[1].replace("Desc", " desc") : split[1];
+            var order = split[1].endsWith("Desc") ? split[1].replace("Desc", " desc")
+                : split[1];
             endQuery.append(" order by ").append("" + order);
         }
-        var tokens = Arrays.asList(fieldsDecompose.split(AND_PATERN));
+        var tokens = List.of(fieldsDecompose.split(AND_PATERN));
         int[] index = { 0 };
         tokens.forEach(token -> {
             if (StringUtils.isNotBlank(token) && values.length > index[0]) {
@@ -90,7 +93,10 @@ public interface IQueryUtils {
         return query;
     }
 
-    default String getSqlQuery(List<QueryUtilsDto> queryDtos, boolean actived, StringBuilder endQuery) {
+    default String getSqlQuery(
+        List<QueryUtilsDto> queryDtos,
+        boolean actived,
+        StringBuilder endQuery) {
         var requete = new StringBuilder();
         queryDtos.forEach(queryDto -> constructRequest(requete, queryDto));
         if (actived) {
@@ -113,14 +119,17 @@ public interface IQueryUtils {
         } else if (CONDITION_IS.equals(queryDto.getCondition())) {
             requete.append(" ").append(queryDto.getField()).append(" is null");
         } else if (BooleanUtils.isTrue(queryDto.getLike())) {
-            requete.append(" UPPER(").append(queryDto.getField()).append(") ").append(queryDto.getCondition())
-                    .append(" UPPER(?").append(queryDto.getIndice() + 1).append(")");
+            requete.append(" UPPER(").append(queryDto.getField()).append(") ")
+                .append(queryDto.getCondition())
+                .append(" UPPER(?").append(queryDto.getIndice() + 1).append(")");
         } else if (BooleanUtils.isTrue(queryDto.getUpper())) {
-            requete.append(" UPPER(").append(queryDto.getField()).append(") ").append(queryDto.getCondition())
-                    .append(" UPPER(?").append(queryDto.getIndice() + 1).append(")");
+            requete.append(" UPPER(").append(queryDto.getField()).append(") ")
+                .append(queryDto.getCondition())
+                .append(" UPPER(?").append(queryDto.getIndice() + 1).append(")");
         } else {
-            requete.append(" ").append(queryDto.getField()).append(" ").append(queryDto.getCondition())
-                    .append(" ?").append(queryDto.getIndice() + 1);
+            requete.append(" ").append(queryDto.getField()).append(" ")
+                .append(queryDto.getCondition())
+                .append(" ?").append(queryDto.getIndice() + 1);
         }
         if (BooleanUtils.isTrue(queryDto.getDoubleBracketClose())) {
             requete.append(" ").append(CONDITION_DOUBLE_BRACKET_CLOSE);
@@ -131,13 +140,16 @@ public interface IQueryUtils {
 
     default String getFieldName(String fieldName) {
         return StringUtils.uncapitalize(fieldName.replace(CONDITION_SUPERIOR_EGAL, "")
-                .replace(CONDITION_INFERIOR_EGAL, "").replace(CONDITION_SUPERIOR, "")
-                .replace(CONDITION_INFERIOR, "").replace(CONDITION_DIFFERENT, "").replace(CONDITION_LIKE, "")
-                .replace(CONDITION_IS_NOT, "").replace(CONDITION_IS, "").replace(CONDITION_EGAL, "")
-                .replace(CONDITION_BRACKET_OPEN, "").replace(CONDITION_BRACKET_CLOSE, "")
-                .replace(CONDITION_DOUBLE_BRACKET_OPEN, "").replace(CONDITION_DOUBLE_BRACKET_CLOSE, "")
-                .replace(CONDITATION_OR, "").replace(" asc", "").replace(" desc", "")
-                .replace(FORCE_UPPER, ""));
+            .replace(CONDITION_INFERIOR_EGAL, "").replace(CONDITION_SUPERIOR, "")
+            .replace(CONDITION_INFERIOR, "").replace(CONDITION_DIFFERENT, "")
+            .replace(CONDITION_LIKE, "")
+            .replace(CONDITION_IS_NOT, "").replace(CONDITION_IS, "")
+            .replace(CONDITION_EGAL, "")
+            .replace(CONDITION_BRACKET_OPEN, "").replace(CONDITION_BRACKET_CLOSE, "")
+            .replace(CONDITION_DOUBLE_BRACKET_OPEN, "")
+            .replace(CONDITION_DOUBLE_BRACKET_CLOSE, "")
+            .replace(CONDITATION_OR, "").replace(" asc", "").replace(" desc", "")
+            .replace(FORCE_UPPER, ""));
     }
 
     default String getFieldCondition(String fieldName) {
@@ -163,7 +175,7 @@ public interface IQueryUtils {
 
     default Boolean isBracketOpen(String fieldName) {
         return fieldName.contains(CONDITION_BRACKET_OPEN)
-                && !fieldName.contains(CONDITION_DOUBLE_BRACKET_OPEN);
+            && !fieldName.contains(CONDITION_DOUBLE_BRACKET_OPEN);
     }
 
     default Boolean isDoubleBracketOpen(String fieldName) {
@@ -172,7 +184,7 @@ public interface IQueryUtils {
 
     default Boolean isBracketClose(String fieldName) {
         return fieldName.contains(CONDITION_BRACKET_CLOSE)
-                && !fieldName.contains(CONDITION_DOUBLE_BRACKET_CLOSE);
+            && !fieldName.contains(CONDITION_DOUBLE_BRACKET_CLOSE);
     }
 
     default Boolean isDoubleBracketClose(String fieldName) {

@@ -2,9 +2,12 @@ package com.base.infrastructure.exception;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+
+import com.base.domain.exception.MetierException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +18,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
 public class BaseExceptionHandler {
-    public static final String ERROR_REFRESH_TOKEN = "NO_REFRESH_TOKEN";
+    public static final List<String> ERROR_401 = List.of("ERROR.USER_REFRESH.NOT_FOUND",
+        "ERROR.USER_REFRESH.REVOKED", "ERROR.USER_REFRESH.EXPIRED",
+        "ERROR.USER_REFRESH.EMPTY", "Access Denied");
     public static final String ERROR_CONTRAINTS_VIOLATION = "ERRORS.CONTRAINTS_VIOLATION";
     public static final String ERROR_RESSOURCE_ACCESS = "ERRORS.RESSOURCE_ACCESS : %s";
-    public static final String ERROR_ACCESS_DENIED = "Access Denied";
-    private static final String METIER_EXCEPTION = "MetierException";
     private static final String PACKAGE = "com.";
     private static final String UNKNOWN = "unknown";
 
@@ -53,20 +56,18 @@ public class BaseExceptionHandler {
         }
 
         String targetedStack;
-        if (exception.getClass().getName().contains(METIER_EXCEPTION)) {
-            targetedStack = Arrays.stream(exception.getStackTrace())
+        if (exception instanceof MetierException metierException) {
+            targetedStack = Arrays.stream(metierException.getStackTrace())
                 .filter(trace -> trace.getClassName().contains(PACKAGE))
                 .findFirst()
                 .map(StackTraceElement::toString)
-                .orElse(getStackTraceAsString(exception));
+                .orElse(getStackTraceAsString(metierException));
         } else {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             targetedStack = getStackTraceAsString(exception);
         }
 
-        if (ERROR_REFRESH_TOKEN.equals(message)) {
-            httpStatus = HttpStatus.UNAUTHORIZED;
-        } else if (ERROR_ACCESS_DENIED.equals(message)) {
+        if (ERROR_401.indexOf(message) != -1) {
             httpStatus = HttpStatus.UNAUTHORIZED;
         } else {
             log.error("EXCEPTION : {}", targetedStack);

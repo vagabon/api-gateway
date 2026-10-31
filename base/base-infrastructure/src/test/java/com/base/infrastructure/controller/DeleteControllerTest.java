@@ -20,7 +20,7 @@ class DeleteControllerTest {
     @Mock
     DeleteUsecase deleteUsecase;
 
-    private class ProfileDeleteController implements DeleteController {
+    private class RoleDeleteController implements DeleteController {
 
         @Override
         public DeleteUsecase getDeleteUsecase() {
@@ -29,7 +29,7 @@ class DeleteControllerTest {
     }
 
     private DeleteController controller() {
-        return new ProfileDeleteController();
+        return new RoleDeleteController();
     }
 
     @Test

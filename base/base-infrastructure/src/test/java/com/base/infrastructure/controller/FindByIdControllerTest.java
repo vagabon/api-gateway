@@ -19,26 +19,26 @@ import static org.mockito.Mockito.when;
 class FindByIdControllerTest {
 
     @Mock
-    FindByIdUsecase<Profile> findByIdUsecase;
+    FindByIdUsecase<Role> findByIdUsecase;
 
-    private class Profile extends BaseCrudDomain {
+    private class Role extends BaseCrudDomain {
     }
 
-    private class ProfileFindByIdController implements FindByIdController<Profile> {
+    private class RoleFindByIdController implements FindByIdController<Role> {
 
         @Override
-        public FindByIdUsecase<Profile> getFindByIdUsecase() {
+        public FindByIdUsecase<Role> getFindByIdUsecase() {
             return findByIdUsecase;
         }
     }
 
-    private FindByIdController<Profile> controller() {
-        return new ProfileFindByIdController();
+    private FindByIdController<Role> controller() {
+        return new RoleFindByIdController();
     }
 
     @Test
     void findById_shouldReturn200WithFoundEntity() {
-        var found = new Profile();
+        var found = new Role();
         when(findByIdUsecase.execute(1L)).thenReturn(found);
 
         var response = controller().findById(1L);

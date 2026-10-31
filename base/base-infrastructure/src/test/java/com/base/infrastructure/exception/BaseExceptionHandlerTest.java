@@ -44,11 +44,11 @@ class BaseExceptionHandlerTest {
     @Test
     void metierException_withRefreshTokenError_returnsUnauthorized() {
         var response = handler.handleRuntimeException(
-            new MetierException(BaseExceptionHandler.ERROR_REFRESH_TOKEN), request);
+            new MetierException("ERROR.USER_REFRESH.NOT_FOUND"), request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody().message())
-            .isEqualTo(BaseExceptionHandler.ERROR_REFRESH_TOKEN);
+            .isEqualTo("ERROR.USER_REFRESH.NOT_FOUND");
     }
 
     @Test

@@ -11,6 +11,7 @@ import com.auth.application.user.user.CreateUserWithGoogleUsecase;
 import com.auth.infrastructure.auth.adapter.AuthCookieAdapter;
 import com.auth.infrastructure.auth.adapter.AuthJwtAdapter;
 import com.auth.infrastructure.auth.api.client.AuthGoogleClient;
+import com.auth.infrastructure.role.adapter.RoleAdapter;
 import com.auth.infrastructure.user.user.adapter.UserAdapter;
 
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthConfig {
     private final UserAdapter userAdapter;
+    private final RoleAdapter roleAdapter;
     private final AuthJwtAdapter authJwtAdapter;
     private final AuthCookieAdapter authCookieAdapter;
     private final AuthGoogleClient authGoogleclient;
@@ -39,18 +41,15 @@ public class AuthConfig {
 
     @Bean
     public AuthenticateUsecase authenticateUsecase() {
-        return new AuthenticateUsecase(userAdapter, authJwtAdapter, authCookieAdapter,
-            createUserWithGoogleUsecase,
-            createUserRefreshUsecase);
+        return new AuthenticateUsecase(userAdapter, roleAdapter, authJwtAdapter,
+            authCookieAdapter, createUserWithGoogleUsecase, createUserRefreshUsecase);
     }
 
     @Bean
     public AuthenticateRefreshUsecase authenticateRefreshUsecase() {
         return new AuthenticateRefreshUsecase(userAdapter, authJwtAdapter,
-            authCookieAdapter,
-            findUserRefreshByTokenUsecase,
-            deleteUserRefreshByTokenUsecase,
-            createUserRefreshUsecase);
+            authCookieAdapter, findUserRefreshByTokenUsecase,
+            deleteUserRefreshByTokenUsecase, createUserRefreshUsecase);
     }
 
     @Bean

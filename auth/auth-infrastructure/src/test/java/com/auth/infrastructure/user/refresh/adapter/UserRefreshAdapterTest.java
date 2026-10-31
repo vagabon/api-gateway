@@ -41,33 +41,29 @@ class UserRefreshAdapterTest {
     void findByToken_returnsMappedDomainWhenFound() {
         var entity = new UserRefreshJpaEntity();
         var domain = new UserRefresh();
-        when(repository.findByTokenAndRevokedFalseAndExpiredDateAfter(
-            eq("abc"), any(Instant.class))).thenReturn(Optional.of(entity));
+        when(repository.findByTokenAndOrigin(
+            eq("abc"), any(String.class))).thenReturn(Optional.of(entity));
         when(mapper.toDomain(entity)).thenReturn(domain);
 
-        assertThat(adapter.findByToken("abc")).isSameAs(domain);
+        assertThat(adapter.findByTokenAndOrigin("abc", "origin")).isSameAs(domain);
     }
 
     @Test
     void findByToken_passesCurrentInstantToRepository() {
-        var before = Instant.now();
-        when(repository.findByTokenAndRevokedFalseAndExpiredDateAfter(
-            eq("abc"), any(Instant.class))).thenReturn(Optional.empty());
+        when(repository.findByTokenAndOrigin(
+            eq("abc"), any(String.class))).thenReturn(Optional.empty());
 
-        adapter.findByToken("abc");
+        adapter.findByTokenAndOrigin("abc", "origin");
 
-        var after = Instant.now();
-        verify(repository).findByTokenAndRevokedFalseAndExpiredDateAfter(
-            eq("abc"), instantCaptor.capture());
-        assertThat(instantCaptor.getValue()).isBetween(before, after);
+        verify(repository).findByTokenAndOrigin("abc", "origin");
     }
 
     @Test
     void findByToken_returnsNullWhenNotFound() {
-        when(repository.findByTokenAndRevokedFalseAndExpiredDateAfter(
-            eq("unknown"), any(Instant.class))).thenReturn(Optional.empty());
+        when(repository.findByTokenAndOrigin(
+            eq("unknown"), any(String.class))).thenReturn(Optional.empty());
 
-        assertThat(adapter.findByToken("unknown")).isNull();
+        assertThat(adapter.findByTokenAndOrigin("unknown", "origin")).isNull();
         verify(mapper).toDomain(null);
     }
 

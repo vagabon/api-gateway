@@ -10,7 +10,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./api-gateway/target/api-gateway-1.0.0-SNAPSHOT.jar:/app/app.jar:ro
+      - ./api/target/api-1.0.0-SNAPSHOT.jar:/app/app.jar:ro
     networks:
       - redis-net
       - postgres-net

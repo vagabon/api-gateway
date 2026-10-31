@@ -1,6 +1,8 @@
 package com.auth.exposition.rest.user.controller;
 
+import com.auth.application.user.user.CachedUserUsecase;
 import com.auth.domain.user.user.model.User;
+import com.auth.domain.user.user.model.UserLight;
 import com.base.application.CreateUsecase;
 import com.base.application.FindByIdUsecase;
 import com.base.application.FindByUsecase;
@@ -28,6 +30,8 @@ class UserRestControllerTest {
     CreateUsecase<User> createUsecase;
     @Mock
     UpdateUsecase<User> updateUsecase;
+    @Mock
+    CachedUserUsecase cachedUserUsecase;
 
     @InjectMocks
     UserRestController controller;
@@ -40,5 +44,27 @@ class UserRestControllerTest {
         when(findByIdUsecase.execute(42L)).thenReturn(user);
 
         assertThat(controller.me(jwt)).isSameAs(user);
+    }
+
+    @Test
+    void create_ShouldCreateUserAndPutItInCache() {
+        var user = new User();
+        when(createUsecase.execute(user)).thenReturn(user);
+        when(cachedUserUsecase.execute(user)).thenReturn(new UserLight());
+
+        var userReponse = controller.create(user);
+
+        assertThat(userReponse.getBody()).isSameAs(user);
+    }
+
+    @Test
+    void update_ShouldCreateUserAndPutItInCache() {
+        var user = new User();
+        when(updateUsecase.execute(user)).thenReturn(user);
+        when(cachedUserUsecase.execute(user)).thenReturn(new UserLight());
+
+        var userReponse = controller.update(user);
+
+        assertThat(userReponse.getBody()).isSameAs(user);
     }
 }

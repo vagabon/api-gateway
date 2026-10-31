@@ -19,27 +19,27 @@ import static org.mockito.Mockito.when;
 class UpdateControllerTest {
 
     @Mock
-    UpdateUsecase<Profile> updateUsecase;
+    UpdateUsecase<Role> updateUsecase;
 
-    private class Profile extends BaseCrudDomain {
+    private class Role extends BaseCrudDomain {
     }
 
-    private class ProfileUpdateController implements UpdateController<Profile> {
+    private class RoleUpdateController implements UpdateController<Role> {
 
         @Override
-        public UpdateUsecase<Profile> getUpdateUsecase() {
+        public UpdateUsecase<Role> getUpdateUsecase() {
             return updateUsecase;
         }
     }
 
-    private UpdateController<Profile> controller() {
-        return new ProfileUpdateController();
+    private UpdateController<Role> controller() {
+        return new RoleUpdateController();
     }
 
     @Test
     void update_shouldReturn200WithUpdatedEntity() {
-        var request = new Profile();
-        var updated = new Profile();
+        var request = new Role();
+        var updated = new Role();
         when(updateUsecase.execute(request)).thenReturn(updated);
 
         var response = controller().update(request);
@@ -51,7 +51,7 @@ class UpdateControllerTest {
 
     @Test
     void update_shouldPropagateException_whenUsecaseFails() {
-        var request = new Profile();
+        var request = new Role();
         when(updateUsecase.execute(request)).thenThrow(new MetierException("ERROR"));
 
         var controller = controller();

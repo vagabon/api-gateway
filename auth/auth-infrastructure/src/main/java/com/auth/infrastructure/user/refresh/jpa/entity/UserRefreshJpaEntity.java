@@ -8,7 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import com.auth.infrastructure.user.user.persistence.entity.UserEntity;
+import com.auth.infrastructure.user.user.jpa.entity.UserJpaEntity;
 import com.base.infrastructure.jpa.entity.BaseCrudJpaEntity;
 
 import lombok.EqualsAndHashCode;
@@ -17,7 +17,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "user_refresh")
+@Table(name = "user_refresh_tokens")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
@@ -27,6 +27,8 @@ public class UserRefreshJpaEntity extends BaseCrudJpaEntity {
     @Column(unique = true)
     private String token;
 
+    private String origin;
+
     private String ipAddress;
 
     private Boolean revoked;
@@ -35,6 +37,6 @@ public class UserRefreshJpaEntity extends BaseCrudJpaEntity {
 
     @ManyToOne()
     @JoinColumn(name = "user_id")
-    private UserEntity user;
+    private UserJpaEntity user;
 
 }

@@ -1,4 +1,4 @@
-CREATE TABLE "user" (
+CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(255),
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -11,10 +11,11 @@ CREATE TABLE "user" (
     updated_date TIMESTAMPTZ
 );
 
-CREATE TABLE profile (
+CREATE TABLE roles (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    roles VARCHAR(255),
+    name VARCHAR(50),
+    role_name VARCHAR(50),
+    origin VARCHAR(50),
     end_plan TIMESTAMP,
     active BOOLEAN,
     creation_date TIMESTAMPTZ,
@@ -22,13 +23,12 @@ CREATE TABLE profile (
     updated_date TIMESTAMPTZ
 );
 
-CREATE TABLE user_profile (
-    user_id BIGINT REFERENCES "user"(id) ON DELETE CASCADE,
-    profile_id BIGINT REFERENCES profile(id) ON DELETE CASCADE,
-    PRIMARY KEY (user_id, profile_id)
+CREATE TABLE user_roles (
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    role_id BIGINT REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
 );
 
-INSERT INTO public.profile (active, creation_date, name, roles) VALUES
-    (TRUE, '2023-04-01 16:30:34.783169+00', 'USER', 'USER'),
-    (TRUE, '2023-04-01 16:30:34.783169+00', 'MEMBER', 'USER,MEMBER'),
-    (TRUE, '2023-04-01 16:30:34.783169+00', 'ADMIN', 'USER,MEMBER,ADMIN');
+INSERT INTO public.roles (active, creation_date, name, role_name, origin) VALUES
+    (TRUE, '2023-10-30 16:30:34.783169+00', 'USER_BLOG', 'USER', 'http://localhost:4200'),
+    (TRUE, '2023-10-30 16:30:34.783169+00', 'ADMIN_BLOG', 'ADMIN', 'http://localhost:4200');

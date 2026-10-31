@@ -19,26 +19,26 @@ import static org.mockito.Mockito.when;
 class DesactivateControllerTest {
 
     @Mock
-    DesactivateUsecase<Profile> desactivateUsecase;
+    DesactivateUsecase<Role> desactivateUsecase;
 
-    private class Profile extends BaseCrudDomain {
+    private class Role extends BaseCrudDomain {
     }
 
-    private class ProfileDesactivateController implements DesactivateController<Profile> {
+    private class RoleDesactivateController implements DesactivateController<Role> {
 
         @Override
-        public DesactivateUsecase<Profile> getDesactivateUsecase() {
+        public DesactivateUsecase<Role> getDesactivateUsecase() {
             return desactivateUsecase;
         }
     }
 
-    private DesactivateController<Profile> controller() {
-        return new ProfileDesactivateController();
+    private DesactivateController<Role> controller() {
+        return new RoleDesactivateController();
     }
 
     @Test
     void desactivate_shouldReturn200WithDesactivatedEntity() {
-        var desactivated = new Profile();
+        var desactivated = new Role();
         when(desactivateUsecase.execute(1L)).thenReturn(desactivated);
 
         var response = controller().desactivate(1L);

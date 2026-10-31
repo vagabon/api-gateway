@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
 
-import com.auth.domain.profile.model.Profile;
+import com.auth.domain.role.model.Role;
 import com.auth.domain.user.user.model.User;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +36,8 @@ class AuthJwtAdapterTest {
 
     private AuthJwtAdapter adapter;
 
+    private final String origin = "http://localhost:4200";
+
     @BeforeEach
     void setUp() {
         adapter = new AuthJwtAdapter(jwtEncoder, ISSUER, ACCESS_TTL);
@@ -45,7 +47,7 @@ class AuthJwtAdapterTest {
     void generateTokenJwt_shouldReturnTokenValueFromEncoder() {
         stubEncoder();
 
-        var token = adapter.generateTokenJwt(userWithRoles(42L, "ADMIN"));
+        var token = adapter.generateTokenJwt(userWithRoles(42L, origin, "ADMIN"), origin);
 
         assertThat(token).isEqualTo("jwt-value");
     }
@@ -55,7 +57,7 @@ class AuthJwtAdapterTest {
         stubEncoder();
         var before = Instant.now();
 
-        adapter.generateTokenJwt(userWithRoles(42L, "ADMIN", "USER"));
+        adapter.generateTokenJwt(userWithRoles(42L, origin, "ADMIN", "USER"), origin);
 
         var claims = captureParameters().getClaims();
         assertThat(claims.getClaimAsString("iss")).isEqualTo(ISSUER);
@@ -73,7 +75,7 @@ class AuthJwtAdapterTest {
     void generateTokenJwt_shouldSignWithHs256() {
         stubEncoder();
 
-        adapter.generateTokenJwt(userWithRoles(1L, "USER"));
+        adapter.generateTokenJwt(userWithRoles(1L, origin, "USER"), origin);
 
         assertThat(captureParameters().getJwsHeader().getAlgorithm())
             .isEqualTo(MacAlgorithm.HS256);
@@ -82,10 +84,10 @@ class AuthJwtAdapterTest {
     @Test
     void generateTokenJwt_shouldGenerateDistinctJtiOnEachCall() {
         stubEncoder();
-        var user = userWithRoles(1L, "USER");
+        var user = userWithRoles(1L, origin, "USER");
 
-        adapter.generateTokenJwt(user);
-        adapter.generateTokenJwt(user);
+        adapter.generateTokenJwt(user, origin);
+        adapter.generateTokenJwt(user, origin);
 
         var captor = ArgumentCaptor.forClass(JwtEncoderParameters.class);
         verify(jwtEncoder, org.mockito.Mockito.times(2)).encode(captor.capture());
@@ -94,24 +96,24 @@ class AuthJwtAdapterTest {
     }
 
     @Test
-    void generateTokenJwt_shouldEmitEmptyRoles_whenUserHasNoProfile() {
+    void generateTokenJwt_shouldEmitEmptyRoles_whenUserHasNoRole() {
         stubEncoder();
         var user = new User();
         user.setId(1L);
-        user.setProfiles(Set.of());
+        user.setRoles(Set.of());
 
-        adapter.generateTokenJwt(user);
+        adapter.generateTokenJwt(user, origin);
 
         assertThat(captureParameters().getClaims().getClaimAsStringList("roles"))
             .isEmpty();
     }
 
     @Test
-    void generateTokenJwt_shouldThrowNpe_whenProfilesIsNull() {
+    void generateTokenJwt_shouldThrowNpe_whenRolesIsNull() {
         var user = new User();
         user.setId(1L);
 
-        assertThatThrownBy(() -> adapter.generateTokenJwt(user))
+        assertThatThrownBy(() -> adapter.generateTokenJwt(user, origin))
             .isInstanceOf(NullPointerException.class);
     }
 
@@ -129,16 +131,18 @@ class AuthJwtAdapterTest {
         return captor.getValue();
     }
 
-    private static User userWithRoles(Long id, String... roles) {
+    private static User userWithRoles(Long id, String origin, String... roles) {
         var user = new User();
         user.setId(id);
-        var profiles = new java.util.HashSet<Profile>();
+        var userRoles = new java.util.HashSet<Role>();
         for (var role : roles) {
-            var profile = new Profile();
-            profile.setName(role);
-            profiles.add(profile);
+            var useRole = new Role();
+            useRole.setName(role);
+            useRole.setRoleName(role);
+            useRole.setOrigin(origin);
+            userRoles.add(useRole);
         }
-        user.setProfiles(profiles);
+        user.setRoles(userRoles);
         return user;
     }
 }

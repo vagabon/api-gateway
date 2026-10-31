@@ -19,27 +19,27 @@ import static org.mockito.Mockito.when;
 class CreateControllerTest {
 
     @Mock
-    CreateUsecase<Profile> createUsecase;
+    CreateUsecase<Role> createUsecase;
 
-    private class Profile extends BaseCrudDomain {
+    private class Role extends BaseCrudDomain {
     }
 
-    private class ProfileCreateController implements CreateController<Profile> {
+    private class RoleCreateController implements CreateController<Role> {
 
         @Override
-        public CreateUsecase<Profile> getCreateUsecase() {
+        public CreateUsecase<Role> getCreateUsecase() {
             return createUsecase;
         }
     }
 
-    private CreateController<Profile> controller() {
-        return new ProfileCreateController();
+    private CreateController<Role> controller() {
+        return new RoleCreateController();
     }
 
     @Test
     void create_shouldReturn200WithCreatedEntity() {
-        var request = new Profile();
-        var created = new Profile();
+        var request = new Role();
+        var created = new Role();
         when(createUsecase.execute(request)).thenReturn(created);
 
         var response = controller().create(request);
@@ -51,7 +51,7 @@ class CreateControllerTest {
 
     @Test
     void create_shouldPropagateException_whenUsecaseFails() {
-        var request = new Profile();
+        var request = new Role();
         when(createUsecase.execute(request)).thenThrow(new MetierException("ERROR"));
 
         var controller = controller();

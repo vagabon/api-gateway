@@ -1,6 +1,6 @@
 package com.auth.exposition.rest.role.controller;
 
-import com.auth.domain.profile.model.Profile;
+import com.auth.domain.role.model.Role;
 import com.base.application.CreateUsecase;
 import com.base.application.FindByIdUsecase;
 import com.base.application.FindByUsecase;
@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RoleRestControllerTest {
 
     @Mock
-    FindByUsecase<Profile> findByUsecase;
+    FindByUsecase<Role> findByUsecase;
     @Mock
-    FindByIdUsecase<Profile> findByIdUsecase;
+    FindByIdUsecase<Role> findByIdUsecase;
     @Mock
-    CreateUsecase<Profile> createUsecase;
+    CreateUsecase<Role> createUsecase;
     @Mock
-    UpdateUsecase<Profile> updateUsecase;
+    UpdateUsecase<Role> updateUsecase;
     @InjectMocks
     RoleRestController controller;
 

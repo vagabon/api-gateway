@@ -3,8 +3,8 @@ package com.auth.application.user.user;
 import java.time.Instant;
 
 import com.auth.domain.auth.model.AuthGoogle;
-import com.auth.domain.profile.model.Profile;
-import com.auth.domain.profile.port.ProfileRepositoryPort;
+import com.auth.domain.role.model.Role;
+import com.auth.domain.role.port.RoleRepositoryPort;
 import com.auth.domain.user.user.model.User;
 import com.auth.domain.user.user.port.UserRepositoryPort;
 
@@ -26,7 +26,7 @@ class CreateUserWithGoogleUsecaseTest {
     @Mock
     UserRepositoryPort userRepository;
     @Mock
-    ProfileRepositoryPort profileRepository;
+    RoleRepositoryPort roleRepository;
     @InjectMocks
     CreateUserWithGoogleUsecase usecase;
 
@@ -37,14 +37,14 @@ class CreateUserWithGoogleUsecaseTest {
         "avatar.png");
 
     @Test
-    void execute_shouldCreateUserWithGoogleFieldsAndDefaultProfile() {
-        var profile = new Profile();
-        when(profileRepository.getProfileUser()).thenReturn(profile);
+    void execute_shouldCreateUserWithGoogleFieldsAndDefaultRole() {
+        var role = new Role();
+        when(roleRepository.getRoleForUser("http://localhost:4200")).thenReturn(role);
         when(userRepository.create(any(User.class)))
             .thenAnswer(inv -> inv.getArgument(0));
         var before = Instant.now();
 
-        var result = usecase.execute(google);
+        var result = usecase.execute(google, "http://localhost:4200");
 
         var captor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).create(captor.capture());
@@ -55,27 +55,27 @@ class CreateUserWithGoogleUsecaseTest {
         assertThat(created.getEmail()).isEqualTo("vagabond@example.com");
         assertThat(created.getAvatar()).isEqualTo("avatar.png");
         assertThat(created.getLastConnexionDate()).isBetween(before, Instant.now());
-        assertThat(created.getProfiles()).containsExactly(profile);
+        assertThat(created.getRoles()).containsExactly(role);
     }
 
     @Test
-    void execute_shouldCreateUserWithoutProfile_whenNoDefaultProfile() {
-        when(profileRepository.getProfileUser()).thenReturn(null);
+    void execute_shouldCreateUserWithoutRole_whenNoDefaultRole() {
+        when(roleRepository.getRoleForUser("http://localhost:4200")).thenReturn(null);
         when(userRepository.create(any(User.class)))
             .thenAnswer(inv -> inv.getArgument(0));
 
-        var result = usecase.execute(google);
+        var result = usecase.execute(google, "http://localhost:4200");
 
-        assertThat(result.getProfiles()).isNullOrEmpty();
+        assertThat(result.getRoles()).isNullOrEmpty();
     }
 
     @Test
     void execute_shouldReturnWhatRepositoryCreateReturns() {
         var persisted = new User();
-        when(profileRepository.getProfileUser()).thenReturn(null);
+        when(roleRepository.getRoleForUser("http://localhost:4200")).thenReturn(null);
         when(userRepository.create(any(User.class))).thenReturn(persisted);
 
-        var result = usecase.execute(google);
+        var result = usecase.execute(google, "http://localhost:4200");
 
         assertThat(result).isSameAs(persisted);
     }

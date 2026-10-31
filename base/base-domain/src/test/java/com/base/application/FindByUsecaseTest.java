@@ -34,7 +34,7 @@ class FindByUsecaseTest {
     void execute_shouldForwardAllParametersAndReturnRepositoryResult() {
         @SuppressWarnings("unchecked")
         PageResult<User> expected = mock(PageResult.class);
-        var values = List.<Object>of("gonz", 18);
+        var values = List.<Object>of("vagabond", 18);
         when(findByRepositoryPort.findBy("name = ?1 and age > ?2", values, 0, 20))
             .thenReturn(expected);
 

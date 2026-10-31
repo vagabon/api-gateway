@@ -5,7 +5,7 @@ import com.base.domain.port.CreateRepositoryPort;
 
 public interface UserRefreshRepositoryPort extends CreateRepositoryPort<UserRefresh> {
 
-    UserRefresh findByToken(String token);
+    UserRefresh findByTokenAndOrigin(String token, String origin);
 
     long deleteUserRefreshByToken(String token);
 

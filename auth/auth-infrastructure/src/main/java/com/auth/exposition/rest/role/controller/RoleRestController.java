@@ -1,6 +1,6 @@
 package com.auth.exposition.rest.role.controller;
 
-import com.auth.domain.profile.model.Profile;
+import com.auth.domain.role.model.Role;
 import com.base.application.CreateUsecase;
 import com.base.application.FindByIdUsecase;
 import com.base.application.FindByUsecase;
@@ -19,16 +19,16 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/v1/roles")
 @RequiredArgsConstructor
-public class RoleRestController implements FindByController<Profile>,
-    FindByIdController<Profile>, CreateController<Profile>, UpdateController<Profile> {
+public class RoleRestController implements FindByController<Role>,
+    FindByIdController<Role>, CreateController<Role>, UpdateController<Role> {
 
     @Getter
-    private final FindByUsecase<Profile> findByUsecase;
+    private final FindByUsecase<Role> findByUsecase;
     @Getter
-    private final FindByIdUsecase<Profile> findByIdUsecase;
+    private final FindByIdUsecase<Role> findByIdUsecase;
     @Getter
-    private final CreateUsecase<Profile> createUsecase;
+    private final CreateUsecase<Role> createUsecase;
     @Getter
-    private final UpdateUsecase<Profile> updateUsecase;
+    private final UpdateUsecase<Role> updateUsecase;
 
 }

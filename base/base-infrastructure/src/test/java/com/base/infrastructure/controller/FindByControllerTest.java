@@ -27,26 +27,26 @@ import static org.mockito.Mockito.when;
 class FindByControllerTest {
 
     @Mock
-    FindByUsecase<Profile> findByUsecase;
+    FindByUsecase<Role> findByUsecase;
 
-    private class Profile extends BaseCrudDomain {
+    private class Role extends BaseCrudDomain {
     }
 
-    private class ProfileFindByController implements FindByController<Profile> {
+    private class RoleFindByController implements FindByController<Role> {
         @Override
-        public FindByUsecase<Profile> getFindByUsecase() {
+        public FindByUsecase<Role> getFindByUsecase() {
             return findByUsecase;
         }
     }
 
-    private final FindByController<Profile> controller;
+    private final FindByController<Role> controller;
 
     FindByControllerTest() {
-        controller = new ProfileFindByController();
+        controller = new RoleFindByController();
     }
 
     @SuppressWarnings("unchecked")
-    private PageResult<Profile> page() {
+    private PageResult<Role> page() {
         return mock(PageResult.class);
     }
 
@@ -56,7 +56,7 @@ class FindByControllerTest {
         when(findByUsecase.execute(anyString(), anyList(), any(), any()))
             .thenReturn(expected);
 
-        var response = controller.findBy("name", "gonz", 0, 10);
+        var response = controller.findBy("name", "vagabond", 0, 10);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isSameAs(expected);
@@ -67,7 +67,7 @@ class FindByControllerTest {
         when(findByUsecase.execute(anyString(), anyList(), any(), any()))
             .thenReturn(page());
 
-        controller.findBy("name", "gonz", null, null);
+        controller.findBy("name", "vagabond", null, null);
 
         verify(findByUsecase).execute(anyString(), anyList(),
             org.mockito.ArgumentMatchers.eq(0),
@@ -79,7 +79,7 @@ class FindByControllerTest {
         when(findByUsecase.execute(anyString(), anyList(), any(), any()))
             .thenReturn(page());
 
-        controller.findBy("name", "gonz", 3, 25);
+        controller.findBy("name", "vagabond", 3, 25);
 
         verify(findByUsecase).execute(anyString(), anyList(),
             org.mockito.ArgumentMatchers.eq(3),
@@ -92,13 +92,13 @@ class FindByControllerTest {
         when(findByUsecase.execute(anyString(), anyList(), any(), any()))
             .thenReturn(page());
 
-        controller.findBy("name", "gonz", 0, 10);
+        controller.findBy("name", "vagabond", 0, 10);
 
         var sql = ArgumentCaptor.forClass(String.class);
         var values = ArgumentCaptor.forClass(List.class);
         verify(findByUsecase).execute(sql.capture(), values.capture(), any(), any());
         assertThat(sql.getValue()).contains("name");
-        assertThat(values.getValue()).containsExactly("gonz");
+        assertThat(values.getValue()).containsExactly("vagabond");
     }
 
     @Test
@@ -119,7 +119,7 @@ class FindByControllerTest {
         when(findByUsecase.execute(anyString(), anyList(), any(), any()))
             .thenThrow(new MetierException("ERROR"));
 
-        assertThatThrownBy(() -> controller.findBy("name", "gonz", 0, 10))
+        assertThatThrownBy(() -> controller.findBy("name", "vagabond", 0, 10))
             .isInstanceOf(MetierException.class);
     }
 
