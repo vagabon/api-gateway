@@ -3,20 +3,17 @@ package com.auth.domain.auth.utils;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import lombok.experimental.UtilityClass;
+public interface AuthUtils {
 
-@UtilityClass
-public class AuthUtils {
+    final int PASSWORD_LENGTH = 10;
+    final int TOKEN_LENGTH = 4;
+    final String HASHTAG = "#";
+    final String SPACE = " ";
+    final String UNDERSCORE = "_";
 
-    private static final int PASSWORD_LENGTH = 10;
-    private static final int TOKEN_LENGTH = 4;
-    private static final String HASHTAG = "#";
-    private static final String SPACE = " ";
-    private static final String UNDERSCORE = "_";
+    final Random random = new SecureRandom();
 
-    private static final Random random = new SecureRandom();
-
-    public static final String generatToken(int nb) {
+    default String generatToken(int nb) {
         var identityToken = new StringBuilder();
         for (var i = 0; i < nb; i++) {
             identityToken.append(random.nextInt(PASSWORD_LENGTH) + 0);
@@ -24,11 +21,11 @@ public class AuthUtils {
         return identityToken.toString();
     }
 
-    public static final String getUsername(String login) {
+    default String getUsername(String login) {
         if (login == null || login.isBlank()) {
             return null;
         }
         return login.trim().replace(SPACE, UNDERSCORE).toLowerCase() + HASHTAG
-            + AuthUtils.generatToken(TOKEN_LENGTH);
+            + generatToken(TOKEN_LENGTH);
     }
 }

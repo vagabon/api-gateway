@@ -1,11 +1,11 @@
-package com.base.infrastructure.utils.query;
+package com.base.infrastructure.utils.query.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class QueryUtilsDto {
+public class QueryDto {
 
     private int indice;
     private String field;

@@ -7,7 +7,7 @@ import com.base.infrastructure.jpa.entity.BaseCrudJpaEntity;
 import com.base.infrastructure.utils.EntityUtils;
 
 public interface UpdateAdapter<E extends BaseCrudJpaEntity, D extends BaseIdDomain>
-    extends UpdateRepositoryPort<D>, BaseAdapter<E, D> {
+    extends UpdateRepositoryPort<D>, BaseAdapter<E, D>, EntityUtils {
 
     default D update(D domain) {
         var entity = getMapper().toJpaEntity(domain);
@@ -16,7 +16,7 @@ public interface UpdateAdapter<E extends BaseCrudJpaEntity, D extends BaseIdDoma
             throw new MetierException(
                 FindByIdAdapter.NOT_FOUND.formatted(domain.getId()));
         }
-        EntityUtils.setEntity(entityFromBdd, entity, false);
+        setEntity(entityFromBdd, entity, false);
         var merged = getRepository().save(entityFromBdd);
         return getMapper().toDomain(merged);
     }

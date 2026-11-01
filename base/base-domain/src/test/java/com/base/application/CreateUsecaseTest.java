@@ -41,8 +41,7 @@ class CreateUsecaseTest {
     @Test
     void execute_shouldPropagateException_whenRepositoryFails() {
         var input = new User();
-        when(createRepositoryPort.create(input))
-            .thenThrow(new MetierException("ERROR"));
+        input.setId(1L);
 
         assertThatThrownBy(() -> usecase.execute(input))
             .isInstanceOf(MetierException.class);

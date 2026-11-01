@@ -14,8 +14,8 @@ public interface DesactivateController<D extends BaseCrudDomain> {
 
     @DeleteMapping("/desactivate/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    default ResponseEntity<D> desactivate(@PathVariable Long id) {
-        D desactivate = getDesactivateUsecase().execute(id);
-        return ResponseEntity.ok(desactivate);
+    default ResponseEntity<Void> desactivate(@PathVariable Long id) {
+        getDesactivateUsecase().execute(id);
+        return ResponseEntity.noContent().build();
     }
 }

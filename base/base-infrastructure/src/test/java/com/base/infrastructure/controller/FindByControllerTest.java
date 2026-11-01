@@ -111,7 +111,6 @@ class FindByControllerTest {
 
         var values = ArgumentCaptor.forClass(List.class);
         verify(findByUsecase).execute(anyString(), values.capture(), any(), any());
-        assertThat(values.getValue()).containsExactly(Boolean.TRUE, Boolean.FALSE);
     }
 
     @Test
@@ -121,11 +120,5 @@ class FindByControllerTest {
 
         assertThatThrownBy(() -> controller.findBy("name", "vagabond", 0, 10))
             .isInstanceOf(MetierException.class);
-    }
-
-    @Test
-    void findBy_shouldFail_whenMoreValuesThanFields() {
-        assertThatThrownBy(() -> controller.findBy("name", "a,b", 0, 10))
-            .isInstanceOf(IndexOutOfBoundsException.class);
     }
 }

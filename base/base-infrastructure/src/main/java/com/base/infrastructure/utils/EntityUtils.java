@@ -5,21 +5,18 @@ import java.lang.reflect.InvocationTargetException;
 
 import com.base.infrastructure.jpa.entity.BaseCrudJpaEntity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import lombok.extern.slf4j.Slf4j;
+public interface EntityUtils {
+    Logger log = LoggerFactory.getLogger(EntityUtils.class);
 
-@Slf4j
-public class EntityUtils {
-
-    private EntityUtils() {
-    }
-
-    public static void setEntity(Object entity1, Object entity2, boolean forceNull) {
+    default void setEntity(Object entity1, Object entity2, boolean forceNull) {
         setEntity(entity1, entity2, entity1.getClass(), forceNull);
     }
 
-    public static void setEntity(
+    default void setEntity(
         Object entity1,
         Object entity2,
         Class<?> entityClass,
@@ -30,7 +27,7 @@ public class EntityUtils {
         }
     }
 
-    private static void setFields(
+    private void setFields(
         Object entity1,
         Object entity2,
         Field[] fields,
@@ -54,7 +51,7 @@ public class EntityUtils {
         }
     }
 
-    private static void doSetValue(
+    private void doSetValue(
         Object entity,
         Object value,
         Field field,
@@ -78,7 +75,7 @@ public class EntityUtils {
         }
     }
 
-    public static boolean isObjectDiff(Object first, Object second) {
+    default boolean isObjectDiff(Object first, Object second) {
         if (first == null && second == null) {
             return false;
         } else if (first == null) {

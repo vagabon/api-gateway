@@ -27,6 +27,7 @@ class FindByUsecaseTest {
 
     @Mock
     FindByRepositoryPort<User> findByRepositoryPort;
+
     @InjectMocks
     FindByUsecase<User> usecase;
 

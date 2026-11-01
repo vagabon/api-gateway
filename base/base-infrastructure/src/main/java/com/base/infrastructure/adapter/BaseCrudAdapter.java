@@ -9,8 +9,8 @@ import com.base.infrastructure.jpa.entity.BaseCrudJpaEntity;
 import lombok.Getter;
 
 public abstract class BaseCrudAdapter<E extends BaseCrudJpaEntity, D extends BaseIdDomain>
-    implements CreateAdapter<E, D>, UpdateAdapter<E, D>, DesactivateAdapter<E, D>,
-    FindByIdAdapter<E, D>, FindByAdapter<E, D> {
+    implements CreateAdapter<E, D>, UpdateAdapter<E, D>, FindByIdAdapter<E, D>,
+    FindByAdapter<E, D> {
 
     @PersistenceContext
     @Getter

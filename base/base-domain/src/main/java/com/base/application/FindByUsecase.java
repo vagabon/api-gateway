@@ -14,11 +14,11 @@ public class FindByUsecase<D extends BaseIdDomain> {
     private final FindByRepositoryPort<D> findByRepositoryPort;
 
     public PageResult<D> execute(
-        String sql,
+        String fields,
         List<Object> values,
         Integer page,
         Integer max) {
-        return findByRepositoryPort.findBy(sql, values, page, max);
+        return findByRepositoryPort.findBy(fields, values, page, max);
     }
 
 }

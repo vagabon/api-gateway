@@ -1,7 +1,8 @@
 package com.base.application;
 
-import com.base.domain.exception.MetierException;
+import com.base.domain.model.BaseIdDomain;
 import com.base.domain.port.DeleteRepositoryPort;
+import com.base.domain.port.FindByIdRepositoryPort;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,43 +10,31 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DeleteUsecaseTest {
 
+    private class User extends BaseIdDomain {
+    }
+
     @Mock
-    DeleteRepositoryPort deleteRepositoryPort;
+    FindByIdRepositoryPort<User> findByIdRepositoryPort;
+    @Mock
+    DeleteRepositoryPort<User> deleteRepositoryPort;
+
     @InjectMocks
-    DeleteUsecase usecase;
+    DeleteUsecase<User> usecase;
 
     @Test
     void execute_shouldReturnTrue_whenRepositoryDeletes() {
-        when(deleteRepositoryPort.delete(1L)).thenReturn(true);
+        var user = new User();
+        user.setId(1L);
+        when(findByIdRepositoryPort.findById(1L)).thenReturn(user);
 
-        var result = usecase.execute(1L);
+        usecase.execute(1L);
 
-        assertThat(result).isTrue();
-        verify(deleteRepositoryPort).delete(1L);
-    }
-
-    @Test
-    void execute_shouldReturnFalse_whenNothingToDelete() {
-        when(deleteRepositoryPort.delete(99L)).thenReturn(false);
-
-        var result = usecase.execute(99L);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    void execute_shouldPropagateException_whenRepositoryFails() {
-        when(deleteRepositoryPort.delete(1L)).thenThrow(new MetierException("ERROR"));
-
-        assertThatThrownBy(() -> usecase.execute(1L))
-            .isInstanceOf(MetierException.class);
+        verify(deleteRepositoryPort).delete(user);
     }
 }

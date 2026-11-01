@@ -1,36 +1,144 @@
 package com.base.infrastructure.utils.query;
 
+import java.util.List;
+
+import com.base.infrastructure.utils.query.dto.QueryDto;
+import com.base.infrastructure.utils.query.utils.QueryUtils;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(MockitoExtension.class)
 class QueryUtilsTest {
+
+    private QueryUtils tested = new QueryUtils() {
+    };
+
+    private String getSqlResult(String fields, Object... values) {
+        return getSqlResult(true, fields, values);
+    }
+
+    private String getSqlResult(Boolean active, String fields, Object... values) {
+        StringBuilder endQuery = new StringBuilder();
+        List<QueryDto> queryDtos = tested.initQueryDto(endQuery, fields, values);
+        return tested.getSqlQuery(queryDtos, active, endQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWithConditionEquals_then_ReturnSqlRequest() {
+        String sqlQuery = getSqlResult("username", "test");
+        assertEquals(" WHERE UPPER(username) = UPPER(?1) and e.active = true", sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWithEndQuery_then_ReturnSqlRequest() {
+        StringBuilder endQuery = new StringBuilder();
+        List<QueryDto> queryDtos = tested.initQueryDto(endQuery, "username", "test");
+        String sqlQuery = tested.getSqlQuery(queryDtos, true, endQuery);
+        assertEquals(" WHERE UPPER(username) = UPPER(?1) and e.active = true", sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWithOrder_then_ReturnSqlRequest() {
+        String sqlQuery = getSqlResult("username>>ordre", "plouf");
+        assertEquals(
+            " WHERE UPPER(username) = UPPER(?1) and e.active = true order by ordre",
+            sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWithGroupBy_then_ReturnSqlRequest() {
+        String sqlQuery = getSqlResult("username<<ordre", "plouf");
+        assertEquals(
+            " WHERE UPPER(username) = UPPER(?1) and e.active = true group by ordre",
+            sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWithLikeAndOrder_then_ReturnSqlRequest() {
+        String sqlQuery = getSqlResult("username%AndActive<<ordre", "plouf", "false");
+        assertEquals(
+            " WHERE UPPER(username) like UPPER(?1) AND active = ?2 and e.active = true group by ordre",
+            sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWithSuperior_then_ReturnSqlRequest() {
+        String sqlQuery = getSqlResult("user.idAnd(usernameAnd|Date>)AndProduct.name",
+            "1", "test", "2015",
+            "plouf");
+        assertEquals(
+            " WHERE user.id = ?1 AND ( UPPER(username) = UPPER(?2) OR date > ?3 ) AND UPPER(product.name) = UPPER(?4) and e.active = true",
+            sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWithSuperiorDate_then_ReturnSqlRequest() {
+        String sqlQuery = getSqlResult(false,
+            "user.idAnd(usernameAnd|Date>=)AndProduct.name", "1", "test",
+            "2015", "plouf");
+        assertEquals(
+            " WHERE user.id = ?1 AND ( UPPER(username) = UPPER(?2) OR date >= ?3 ) AND UPPER(product.name) = UPPER(?4)",
+            sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWitAllDate_then_ReturnSqlRequest() {
+        String sqlQuery = getSqlResult(false,
+            "user.idAnd((usernameAnd|Date>=)AndProduct.name)AndDate<AndDate<=AndDate>AndDate#",
+            "1",
+            "test", "2015", "plouf", "plouf", "plouf", "plouf", "plouf", "plouf");
+        assertEquals(
+            " WHERE user.id = ?1 AND (( UPPER(username) = UPPER(?2) OR date >= ?3 ) AND UPPER(product.name) = UPPER(?4) ) AND UPPER(date) < UPPER(?5) AND UPPER(date) <= UPPER(?6) AND UPPER(date) > UPPER(?7) AND UPPER(date) = UPPER(?8)",
+            sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_when_initQueryDtoWitAllDate_then_ReturnSqlRequest2() {
+        String sqlQuery = getSqlResult(false,
+            "(name%And|Function%And|User.username%)AndActiveAnd((IsPrivate~And|IsPrivate!~))",
+            "1",
+            "test", "2015", "plouf", "null", "true", "null", "true");
+        assertEquals(
+            " WHERE ( UPPER(name) like UPPER(?1) OR UPPER(function) like UPPER(?2) OR UPPER(user.username) like UPPER(?3) ) AND UPPER(active) = UPPER(?4) AND (( isPrivate is null OR isPrivate is not true ))",
+            sqlQuery);
+    }
+
+    @Test
+    void given_QueryUtils_whenWtrongNumber_Then_ThrowException() {
+        var result = tested.initQueryDto(new StringBuilder(), "number", "3.3");
+        assertEquals(3.3f, result.get(0).getValue());
+    }
 
     @Test
     void getLike_entourePourcentEtMetEnMajuscules() {
-        assertThat(QueryUtils.getLike("john")).isEqualTo("%JOHN%");
+        assertThat(tested.getLike("john")).isEqualTo("%JOHN%");
     }
 
     @Test
     void getLike_valeurNull_retourneDeuxPourcents() {
-        assertThat(QueryUtils.getLike(null)).isEqualTo("%%");
+        assertThat(tested.getLike(null)).isEqualTo("%%");
     }
 
     @Test
     void getLike_valeurVide_retourneDeuxPourcents() {
-        assertThat(QueryUtils.getLike("")).isEqualTo("%%");
+        assertThat(tested.getLike("")).isEqualTo("%%");
     }
 
     @Test
     void getLike_conserveLesEspacesEtCaracteresSpeciaux() {
-        assertThat(QueryUtils.getLike("Jean Dupont-1")).isEqualTo("%JEAN DUPONT-1%");
+        assertThat(tested.getLike("Jean Dupont-1")).isEqualTo("%JEAN DUPONT-1%");
     }
 
     @ParameterizedTest
     @CsvSource({ "abc,%ABC%", "ABC,%ABC%", "aBc,%ABC%", "été,%ÉTÉ%" })
     void getLike_normaliseEnMajuscules(String input, String expected) {
-        assertThat(QueryUtils.getLike(input)).isEqualTo(expected);
+        assertThat(tested.getLike(input)).isEqualTo(expected);
     }
 }

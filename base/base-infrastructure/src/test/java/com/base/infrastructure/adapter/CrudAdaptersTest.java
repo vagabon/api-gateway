@@ -1,6 +1,5 @@
 package com.base.infrastructure.adapter;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
@@ -32,14 +31,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CrudAdaptersTest {
 
-    private class User extends BaseCrudDomain {
+    class User extends BaseCrudDomain {
 
     }
 
-    private class UserJpaEntity extends BaseCrudJpaEntity {
+    class UserJpaEntity extends BaseCrudJpaEntity {
     }
 
-    private interface UserMapper extends BaseMapper<UserJpaEntity, User> {
+    interface UserMapper extends BaseMapper<UserJpaEntity, User> {
     }
 
     @Mock
@@ -49,7 +48,7 @@ class CrudAdaptersTest {
     @Mock
     EntityManager em;
 
-    private TestAdapter adapter;
+    TestAdapter adapter;
 
     @BeforeEach
     void setUp() {
@@ -122,48 +121,13 @@ class CrudAdaptersTest {
 
     @Test
     void delete_shouldDeleteEntityAndReturnTrue_whenFound() {
-        var entity = new UserJpaEntity();
-        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        var user = new User();
+        var userEntity = new UserJpaEntity();
+        when(mapper.toJpaEntity(user)).thenReturn(userEntity);
 
-        assertThat(adapter.delete(1L)).isTrue();
-        verify(repository).delete(entity);
-    }
+        adapter.delete(user);
 
-    @Test
-    void delete_shouldThrowAndNotDelete_whenNotFound() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> adapter.delete(99L))
-            .isInstanceOf(MetierException.class);
-        verify(repository, never()).delete(any());
-    }
-
-    // ---------- desactivate ----------
-
-    @Test
-    void desactivate_shouldSetInactiveAndDeletedDate_thenSave() {
-        var entity = new UserJpaEntity();
-        entity.setActive(true);
-        var expected = new User();
-        when(repository.findById(1L)).thenReturn(Optional.of(entity));
-        when(mapper.toDomain(entity)).thenReturn(expected);
-        var before = Instant.now();
-
-        var result = adapter.desactivate(1L);
-
-        assertThat(result).isSameAs(expected);
-        assertThat(entity.getActive()).isFalse();
-        assertThat(entity.getDeletedDate()).isBetween(before, Instant.now());
-        verify(repository).save(entity);
-    }
-
-    @Test
-    void desactivate_shouldThrowAndNotSave_whenNotFound() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> adapter.desactivate(99L))
-            .isInstanceOf(MetierException.class);
-        verify(repository, never()).save(any());
+        verify(repository).delete(userEntity);
     }
 
     // ---------- update ----------

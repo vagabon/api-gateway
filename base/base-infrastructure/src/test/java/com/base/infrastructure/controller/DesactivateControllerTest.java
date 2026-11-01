@@ -43,8 +43,7 @@ class DesactivateControllerTest {
 
         var response = controller().desactivate(1L);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isSameAs(desactivated);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         verify(desactivateUsecase).execute(1L);
     }
 

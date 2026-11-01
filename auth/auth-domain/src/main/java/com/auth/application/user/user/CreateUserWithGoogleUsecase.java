@@ -13,7 +13,7 @@ import com.auth.domain.user.user.port.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class CreateUserWithGoogleUsecase {
+public class CreateUserWithGoogleUsecase implements AuthUtils {
 
     private final UserRepositoryPort userRepository;
     private final RoleRepositoryPort roleRepository;
@@ -21,7 +21,7 @@ public class CreateUserWithGoogleUsecase {
     public User execute(AuthGoogle authGoogle, String origin) {
         var user = new User();
         user.setGoogleId(authGoogle.sub());
-        user.setUsername(AuthUtils.getUsername(authGoogle.givenName()));
+        user.setUsername(getUsername(authGoogle.givenName()));
         user.setEmail(authGoogle.email());
         user.setAvatar(authGoogle.picture());
         user.setLastConnexionDate(Instant.now());

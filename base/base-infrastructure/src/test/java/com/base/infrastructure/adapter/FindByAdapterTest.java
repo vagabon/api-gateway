@@ -99,17 +99,18 @@ class FindByAdapterTest {
     @Test
     @SuppressWarnings("unchecked")
     void findBy_shouldBeVulnerableToHqlInjectionThroughSql_documentsRisk() {
-        var sql = "from UserJpaEntity where username = 'x' or 1=1";
+        var fields = "username";
 
         var session = mock(Session.class);
         var query = mock(SelectionQuery.class);
         when(em.unwrap(Session.class)).thenReturn(session);
-        when(session.createSelectionQuery(sql, UserJpaEntity.class))
-            .thenReturn(query);
+        when(session.createSelectionQuery(" WHERE UPPER(username) = UPPER(?1)",
+            UserJpaEntity.class))
+                .thenReturn(query);
         when(query.setPage(any())).thenReturn(query);
         when(query.getResultList()).thenReturn(createUser(25));
 
-        var result = adapter.findBy(sql, List.of(), 1, 100);
+        var result = adapter.findBy(fields, List.of("vagabond"), 1, 100);
 
         assertThat(result.content()).hasSize(25);
     }

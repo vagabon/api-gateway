@@ -1,5 +1,7 @@
 package com.base.domain.port;
 
-public interface CreateRepositoryPort<D> {
+import com.base.domain.model.BaseIdDomain;
+
+public interface CreateRepositoryPort<D extends BaseIdDomain> {
     D create(D domain);
 }

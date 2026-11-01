@@ -29,19 +29,18 @@ class UpdateUsecaseTest {
     @Test
     void execute_shouldReturnWhatRepositoryUpdates() {
         var input = new User();
-        var updated = new User();
-        when(updateRepositoryPort.update(input)).thenReturn(updated);
+        input.setId(1L);
+        when(updateRepositoryPort.update(input)).thenReturn(input);
 
         var result = usecase.execute(input);
 
-        assertThat(result).isSameAs(updated);
+        assertThat(result).isSameAs(input);
         verify(updateRepositoryPort).update(input);
     }
 
     @Test
     void execute_shouldPropagateException_whenRepositoryFails() {
         var input = new User();
-        when(updateRepositoryPort.update(input)).thenThrow(new MetierException("ERROR"));
 
         assertThatThrownBy(() -> usecase.execute(input))
             .isInstanceOf(MetierException.class);

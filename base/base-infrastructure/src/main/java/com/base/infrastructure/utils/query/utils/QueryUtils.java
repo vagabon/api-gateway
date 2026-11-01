@@ -1,13 +1,15 @@
-package com.base.infrastructure.utils.query;
+package com.base.infrastructure.utils.query.utils;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import com.base.infrastructure.utils.query.dto.QueryDto;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-public interface IQueryUtils {
+public interface QueryUtils {
 
     String SELECT = "SELECT";
     String FROM = "FROM";
@@ -35,11 +37,11 @@ public interface IQueryUtils {
     String CONDITATION_OR = "|";
     String FORCE_UPPER = "#";
 
-    default List<QueryUtilsDto> initQueryDto(
+    default List<QueryDto> initQueryDto(
         StringBuilder endQuery,
         String fields,
         Object... values) {
-        var queryDtos = new LinkedList<QueryUtilsDto>();
+        var queryDtos = new LinkedList<QueryDto>();
         var fieldsDecompose = fields;
         var split = fieldsDecompose.split("<<");
         if (split.length > 1) {
@@ -64,8 +66,8 @@ public interface IQueryUtils {
         return queryDtos;
     }
 
-    private QueryUtilsDto initQueryDto(int[] index, String token, Object... values) {
-        var query = new QueryUtilsDto();
+    private QueryDto initQueryDto(int[] index, String token, Object... values) {
+        var query = new QueryDto();
         query.setIndice(index[0]);
         query.setField(getFieldName(token));
         query.setCondition(getFieldCondition(token));
@@ -94,7 +96,7 @@ public interface IQueryUtils {
     }
 
     default String getSqlQuery(
-        List<QueryUtilsDto> queryDtos,
+        List<QueryDto> queryDtos,
         boolean actived,
         StringBuilder endQuery) {
         var requete = new StringBuilder();
@@ -106,7 +108,7 @@ public interface IQueryUtils {
         return requete.toString();
     }
 
-    private void constructRequest(StringBuilder requete, QueryUtilsDto queryDto) {
+    private void constructRequest(StringBuilder requete, QueryDto queryDto) {
         var andOr = BooleanUtils.isTrue(queryDto.getOr()) ? OR : AND;
         requete.append(" ").append(requete.toString().contains(WHERE) ? andOr : WHERE);
         if (BooleanUtils.isTrue(queryDto.getDoubleBracketOpen())) {
@@ -197,5 +199,14 @@ public interface IQueryUtils {
 
     default Boolean isOr(String fieldName) {
         return fieldName.contains(CONDITATION_OR);
+    }
+
+    default String getLike(String value) {
+        String valueDefined = value == null ? StringUtils.EMPTY : value;
+        var valueLike = new StringBuilder();
+        valueLike.append(CONDITION_LIKE);
+        valueLike.append(valueDefined.toUpperCase());
+        valueLike.append(CONDITION_LIKE);
+        return valueLike.toString();
     }
 }

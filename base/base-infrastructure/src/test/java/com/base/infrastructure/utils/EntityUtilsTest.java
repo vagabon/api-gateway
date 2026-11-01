@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @ExtendWith(MockitoExtension.class)
-class EntityUtilsTest {
+class EntityUtilsTest implements EntityUtils {
 
     @Test
     void test() {
@@ -30,23 +30,23 @@ class EntityUtilsTest {
         entity2.username = "username";
         entity2.myDate = now;
 
-        EntityUtils.setEntity(entity1, entity2, true);
+        setEntity(entity1, entity2, true);
 
         Assertions.assertEquals("name2", entity1.name);
         Assertions.assertEquals("username", entity1.username);
         Assertions.assertEquals(now, entity1.myDate);
 
         entity2.myDate = null;
-        EntityUtils.setEntity(entity1, entity2, true);
+        setEntity(entity1, entity2, true);
         Assertions.assertEquals(null, entity1.myDate);
     }
 
     @Test
     void Given_EntityUtilsTest_When_isObjectDiff_Then_return_correcValue() {
-        Assertions.assertEquals(false, EntityUtils.isObjectDiff(null, null));
-        Assertions.assertEquals(true, EntityUtils.isObjectDiff(null, "test"));
-        Assertions.assertEquals(false, EntityUtils.isObjectDiff("test", "test"));
-        Assertions.assertEquals(true, EntityUtils.isObjectDiff("test", "test2"));
+        Assertions.assertEquals(false, isObjectDiff(null, null));
+        Assertions.assertEquals(true, isObjectDiff(null, "test"));
+        Assertions.assertEquals(false, isObjectDiff("test", "test"));
+        Assertions.assertEquals(true, isObjectDiff("test", "test2"));
     }
 
     @Getter
@@ -70,7 +70,7 @@ class EntityUtilsTest {
         entity1.username = "username";
         var entity2 = new Entity2();
 
-        EntityUtils.setEntity(entity1, entity2, true);
+        setEntity(entity1, entity2, true);
 
         assertEquals(entity1.name, entity2.name);
     }
