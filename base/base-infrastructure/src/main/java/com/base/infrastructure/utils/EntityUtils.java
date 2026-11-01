@@ -44,7 +44,7 @@ public interface EntityUtils {
                     value = entity2.getClass().getMethod(getterName).invoke(entity2);
                 } catch (IllegalAccessException | InvocationTargetException
                     | NoSuchMethodException _) {
-                    log.error("expcetion EntityUtils.setFields : " + getterName);
+                    log.error("expcetion EntityUtils.setFields : {}", getterName);
                 }
                 doSetValue(entity1, value, field, forceNull);
             }
@@ -60,7 +60,7 @@ public interface EntityUtils {
             StringUtils.capitalize(field.getName()));
         try {
             var newValue = value;
-            log.debug("setValue: " + setterName + " " + newValue);
+            log.debug("setValue {} : {}", setterName, newValue);
             if (newValue != null || forceNull) {
                 if (value instanceof BaseCrudJpaEntity baseEntity
                     && baseEntity.getId().equals(-1L)) {
@@ -71,7 +71,7 @@ public interface EntityUtils {
             }
         } catch (IllegalAccessException | InvocationTargetException
             | NoSuchMethodException _) {
-            log.error("expcetion EntityUtils.doSetValue : " + setterName);
+            log.error("expcetion EntityUtils.doSetValue : {}", setterName);
         }
     }
 
