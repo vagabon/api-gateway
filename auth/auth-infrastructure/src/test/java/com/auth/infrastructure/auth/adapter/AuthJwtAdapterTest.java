@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -90,7 +91,7 @@ class AuthJwtAdapterTest {
         adapter.generateTokenJwt(user, origin);
 
         var captor = ArgumentCaptor.forClass(JwtEncoderParameters.class);
-        verify(jwtEncoder, org.mockito.Mockito.times(2)).encode(captor.capture());
+        verify(jwtEncoder, times(2)).encode(captor.capture());
         var ids = captor.getAllValues().stream().map(p -> p.getClaims().getId()).toList();
         assertThat(ids.get(0)).isNotEqualTo(ids.get(1));
     }

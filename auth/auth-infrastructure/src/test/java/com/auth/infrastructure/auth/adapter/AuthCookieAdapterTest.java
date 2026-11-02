@@ -22,7 +22,7 @@ class AuthCookieAdapterTest {
 
     @Test
     void create_shouldBuildSecureHttpOnlyStrictCookieWithTokenAndTtl() {
-        var cookie = adapter.create("refresh-1");
+        var cookie = adapter.createCookie("refresh-1");
 
         assertThat(cookie.getName()).isEqualTo(NAME);
         assertThat(cookie.getValue()).isEqualTo("refresh-1");
@@ -35,7 +35,7 @@ class AuthCookieAdapterTest {
 
     @Test
     void clear_shouldBuildEmptyExpiredCookieWithSameNameAndPath() {
-        var cookie = adapter.clear();
+        var cookie = adapter.clearCookie();
 
         assertThat(cookie.getName()).isEqualTo(NAME);
         assertThat(cookie.getValue()).isEmpty();
@@ -48,7 +48,7 @@ class AuthCookieAdapterTest {
 
     @Test
     void create_shouldSerializeToExpectedSetCookieHeader() {
-        assertThat(adapter.create("refresh-1").toString())
+        assertThat(adapter.createCookie("refresh-1").toString())
             .contains("refresh_token=refresh-1")
             .contains("Path=/v1/auth")
             .contains("Max-Age=3600")

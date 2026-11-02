@@ -76,13 +76,13 @@ class AuthenticateRefreshUsecaseTest {
         var user = mock(User.class);
         var userRefresh = mock(UserRefresh.class);
         when(userRefresh.getUser()).thenReturn(user);
-        when(findUserRefreshByTokenUsecase.execute("old", origin))
+        when(findUserRefreshByTokenUsecase.execute("old"))
             .thenReturn(userRefresh);
         when(authCookieRepository.getRefreshTokenTimeToLive()).thenReturn(TTL);
         when(createUserRefreshUsecase.execute(user, origin, ipAdress, TTL))
             .thenReturn("new-refresh");
         when(authJwtRepository.generateTokenJwt(user, origin)).thenReturn("jwt");
-        when(authCookieRepository.create("new-refresh")).thenReturn("cookie");
+        when(authCookieRepository.createCookie("new-refresh")).thenReturn("cookie");
 
         var result = usecase.execute("old", origin, ipAdress);
 
@@ -91,7 +91,7 @@ class AuthenticateRefreshUsecaseTest {
         var order = inOrder(findUserRefreshByTokenUsecase,
             deleteUserRefreshByTokenUsecase,
             user, userRepository, createUserRefreshUsecase);
-        order.verify(findUserRefreshByTokenUsecase).execute("old", origin);
+        order.verify(findUserRefreshByTokenUsecase).execute("old");
         order.verify(deleteUserRefreshByTokenUsecase).execute("old");
         order.verify(user).updateLastConnexion();
         order.verify(userRepository).update(user);
@@ -100,7 +100,7 @@ class AuthenticateRefreshUsecaseTest {
 
     @Test
     void execute_shouldNotCreateNewToken_whenFindThrows() {
-        when(findUserRefreshByTokenUsecase.execute("unknown", origin))
+        when(findUserRefreshByTokenUsecase.execute("unknown"))
             .thenThrow(
                 new MetierException(AuthenticateRefreshUsecase.ERROR_REFRESH_TOKEN));
 

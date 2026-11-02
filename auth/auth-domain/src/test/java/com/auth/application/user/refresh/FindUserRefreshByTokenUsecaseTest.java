@@ -25,29 +25,26 @@ class FindUserRefreshByTokenUsecaseTest {
     @InjectMocks
     FindUserRefreshByTokenUsecase usecase;
 
-    private final String origin = "http://localhost:4200";
-
     @Test
     void execute_shouldReturnUserRefresh_whenTokenExists() {
         var expected = new UserRefresh();
         expected.setExpiredDate(Instant.now().plusSeconds(10000000));
-        when(userRefreshRepository.findByTokenAndOrigin("refresh-1", origin))
-            .thenReturn(expected);
+        when(userRefreshRepository.findByToken("refresh-1")).thenReturn(expected);
 
-        var result = usecase.execute("refresh-1", origin);
+        var result = usecase.execute("refresh-1");
 
         assertThat(result).isSameAs(expected);
-        verify(userRefreshRepository).findByTokenAndOrigin("refresh-1", origin);
+        verify(userRefreshRepository).findByToken("refresh-1");
     }
 
     @Test
     void execute_shouldThrowMetierException_whenTokenRevoked() {
         var expected = new UserRefresh();
         expected.setRevoked(true);
-        when(userRefreshRepository.findByTokenAndOrigin("refresh-1", origin))
+        when(userRefreshRepository.findByToken("refresh-1"))
             .thenReturn(expected);
 
-        assertThatThrownBy(() -> usecase.execute("refresh-1", origin))
+        assertThatThrownBy(() -> usecase.execute("refresh-1"))
             .isInstanceOf(MetierException.class)
             .hasMessageContaining(FindUserRefreshByTokenUsecase.USER_REFRESH_REVOKED);
     }
@@ -56,20 +53,20 @@ class FindUserRefreshByTokenUsecaseTest {
     void execute_shouldThrowMetierException_whenTokenExpired() {
         var expected = new UserRefresh();
         expected.setExpiredDate(Instant.now().minusSeconds(10000000));
-        when(userRefreshRepository.findByTokenAndOrigin("refresh-1", origin))
+        when(userRefreshRepository.findByToken("refresh-1"))
             .thenReturn(expected);
 
-        assertThatThrownBy(() -> usecase.execute("refresh-1", origin))
+        assertThatThrownBy(() -> usecase.execute("refresh-1"))
             .isInstanceOf(MetierException.class)
             .hasMessageContaining(FindUserRefreshByTokenUsecase.USER_REFRESH_EXPIRED);
     }
 
     @Test
     void execute_shouldThrowMetierException_whenTokenUnknown() {
-        when(userRefreshRepository.findByTokenAndOrigin("unknown", origin))
+        when(userRefreshRepository.findByToken("unknown"))
             .thenReturn(null);
 
-        assertThatThrownBy(() -> usecase.execute("unknown", origin))
+        assertThatThrownBy(() -> usecase.execute("unknown"))
             .isInstanceOf(MetierException.class)
             .hasMessageContaining(FindUserRefreshByTokenUsecase.USER_REFRESH_NOT_FOUND);
     }

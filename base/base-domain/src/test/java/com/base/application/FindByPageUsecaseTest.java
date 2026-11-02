@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +31,7 @@ class FindByPageUsecaseTest {
     @Test
     void execute_shouldReturnPageFromRepository() {
         @SuppressWarnings("unchecked")
-        PageResult<User> expected = org.mockito.Mockito.mock(PageResult.class);
+        PageResult<User> expected = mock(PageResult.class);
         when(findByPageRepositoryPort.findByPage(0, 20, "id")).thenReturn(expected);
 
         var result = usecase.execute(0, 20, "id");

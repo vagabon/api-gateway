@@ -46,7 +46,7 @@ public class AuthenticateUsecase {
 
         var jwt = authJwtRepository.generateTokenJwt(user, origin);
 
-        var cookie = authCookieRepository.create(refreshToken);
+        var cookie = authCookieRepository.createCookie(refreshToken);
 
         return new AuthIdentity(user, jwt, cookie, refreshToken);
     }

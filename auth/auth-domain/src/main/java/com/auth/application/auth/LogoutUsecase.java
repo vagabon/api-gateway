@@ -15,6 +15,6 @@ public class LogoutUsecase {
 
         deleteUserRefreshByTokenUsecase.execute(refreshToken);
 
-        return authCookieRepository.clear();
+        return authCookieRepository.clearCookie();
     }
 }

@@ -113,7 +113,7 @@ class AuthenticateUsecaseTest {
             authCookieRepository);
         order.verify(createUserRefreshUsecase).execute(user, origin, ipAdress, TTL);
         order.verify(authJwtRepository).generateTokenJwt(user, origin);
-        order.verify(authCookieRepository).create("refresh-1");
+        order.verify(authCookieRepository).createCookie("refresh-1");
     }
 
     // adapte les types (String ici) à ceux de tes ports
@@ -122,6 +122,6 @@ class AuthenticateUsecaseTest {
         when(createUserRefreshUsecase.execute(user, origin, ipAdress, TTL))
             .thenReturn("refresh-1");
         when(authJwtRepository.generateTokenJwt(user, origin)).thenReturn("jwt");
-        when(authCookieRepository.create("refresh-1")).thenReturn("cookie");
+        when(authCookieRepository.createCookie("refresh-1")).thenReturn("cookie");
     }
 }

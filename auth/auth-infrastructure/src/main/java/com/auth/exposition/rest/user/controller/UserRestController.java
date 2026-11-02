@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 
 import com.auth.application.user.user.CachedUserUsecase;
 import com.auth.domain.user.user.model.User;
+import com.auth.infrastructure.user.user.adapter.UserRedisAdapter;
 import com.base.application.CreateUsecase;
 import com.base.application.FindByIdUsecase;
 import com.base.application.FindByUsecase;
@@ -42,6 +43,7 @@ public class UserRestController
     private final UpdateUsecase<User> updateUsecase;
 
     private final CachedUserUsecase cachedUserUsecase;
+    private final UserRedisAdapter userRedisAdapter;
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated() && hasRole('USER')")
@@ -54,6 +56,7 @@ public class UserRestController
     public ResponseEntity<User> create(@Valid @RequestBody User request) {
         var userResponse = CreateController.super.create(request);
         cachedUserUsecase.execute(userResponse.getBody());
+        userRedisAdapter.evict(userResponse.getBody().getId());
         return userResponse;
     }
 
@@ -61,6 +64,7 @@ public class UserRestController
     public ResponseEntity<User> update(@Valid @RequestBody User request) {
         var userResponse = UpdateController.super.update(request);
         cachedUserUsecase.execute(userResponse.getBody());
+        userRedisAdapter.evict(userResponse.getBody().getId());
         return userResponse;
     }
 }

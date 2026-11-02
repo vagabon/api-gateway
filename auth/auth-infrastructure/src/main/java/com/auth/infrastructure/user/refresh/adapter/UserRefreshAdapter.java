@@ -26,8 +26,8 @@ public class UserRefreshAdapter
     private final UserRefreshMapper mapper;
 
     @Override
-    public UserRefresh findByTokenAndOrigin(String token, String origin) {
-        var userRefresh = repository.findByTokenAndOrigin(token, origin)
+    public UserRefresh findByToken(String token) {
+        var userRefresh = repository.findByToken(token)
             .orElse(null);
         return mapper.toDomain(userRefresh);
     }

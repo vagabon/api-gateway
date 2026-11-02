@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,7 +57,7 @@ class UserMongoAdapterTest {
         var creationDate = Instant.now();
         var lastConnexion = Instant.now();
 
-        User user = org.mockito.Mockito.mock(User.class);
+        User user = mock(User.class);
         when(user.getId()).thenReturn(1L);
         when(user.getUsername()).thenReturn("gonz");
         when(user.getEmail()).thenReturn("gonz@mail.com");
@@ -64,7 +65,7 @@ class UserMongoAdapterTest {
         when(user.getAvatar()).thenReturn("avatar.png");
         when(user.getLastConnexionDate()).thenReturn(lastConnexion);
 
-        var light = org.mockito.Mockito.mock(UserLight.class);
+        var light = mock(UserLight.class);
         when(repository.findById(1L)).thenReturn(Optional.empty());
         when(repository.save(any(UserMongoDocument.class)))
             .thenAnswer(inv -> inv.getArgument(0));
@@ -96,12 +97,12 @@ class UserMongoAdapterTest {
         existing.setEmail("old@mail.com");
         existing.setCreationDate(oldCreationDate);
 
-        User user = org.mockito.Mockito.mock(User.class);
+        User user = mock(User.class);
         when(user.getId()).thenReturn(1L);
         when(user.getAvatar()).thenReturn("new-avatar.png");
         when(user.getLastConnexionDate()).thenReturn(lastConnexion);
 
-        var light = org.mockito.Mockito.mock(UserLight.class);
+        var light = mock(UserLight.class);
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
         when(repository.save(existing)).thenReturn(existing);
         when(mapper.toDomainLight(existing)).thenReturn(light);

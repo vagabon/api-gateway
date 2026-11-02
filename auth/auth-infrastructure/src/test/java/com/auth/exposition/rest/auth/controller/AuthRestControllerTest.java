@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +26,7 @@ import org.springframework.http.ResponseCookie;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -65,7 +65,7 @@ class AuthRestControllerTest {
         var google = new AuthGoogle("sub-1", "client-id", "vagabond@example.com", true,
             "Vagabond", "pic.png");
         var request = new AuthGoogleRequest("google-token");
-        var servletRequest = Mockito.mock(HttpServletRequest.class);
+        var servletRequest = mock(HttpServletRequest.class);
         when(googleConnectUsecase.execute("google-token")).thenReturn(google);
         when(servletRequest.getRemoteAddr()).thenReturn(ipAdress);
         when(servletRequest.getHeader(HttpHeaders.ORIGIN)).thenReturn(origin);
@@ -87,7 +87,7 @@ class AuthRestControllerTest {
     @Test
     void googleConnectIdentity_shouldPropagateExceptionAndNotAuthenticate_whenGoogleRejectsToken() {
         var request = new AuthGoogleRequest("bad");
-        var servletRequest = Mockito.mock(HttpServletRequest.class);
+        var servletRequest = mock(HttpServletRequest.class);
         when(googleConnectUsecase.execute("bad"))
             .thenThrow(new MetierException("INVALID_GOOGLE_TOKEN"));
 
@@ -102,7 +102,7 @@ class AuthRestControllerTest {
 
     @Test
     void refreshToken_shouldReturnNewJwtAndRotatedCookie() {
-        var servletRequest = Mockito.mock(HttpServletRequest.class);
+        var servletRequest = mock(HttpServletRequest.class);
         when(servletRequest.getRemoteAddr()).thenReturn(ipAdress);
         when(servletRequest.getHeader(HttpHeaders.ORIGIN)).thenReturn(origin);
         when(authenticateRefreshUsecase.execute("old", origin, ipAdress))
@@ -118,7 +118,7 @@ class AuthRestControllerTest {
 
     @Test
     void refreshToken_shouldPropagateException_whenUsecaseRejectsToken() {
-        var servletRequest = Mockito.mock(HttpServletRequest.class);
+        var servletRequest = mock(HttpServletRequest.class);
         when(servletRequest.getRemoteAddr()).thenReturn(ipAdress);
         when(servletRequest.getHeader(HttpHeaders.ORIGIN)).thenReturn(origin);
         when(authenticateRefreshUsecase.execute(null, origin, ipAdress))

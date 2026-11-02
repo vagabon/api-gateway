@@ -27,7 +27,7 @@ public class AuthCookieAdapter implements AuthCookieRepositoryPort {
         this.refreshTokenTimeToLive = refreshTokenTimeToLive;
     }
 
-    public ResponseCookie create(String refreshToken) {
+    public ResponseCookie createCookie(String refreshToken) {
         return ResponseCookie.from(refreshTokenName, refreshToken)
             .httpOnly(true)
             .secure(true)
@@ -37,7 +37,7 @@ public class AuthCookieAdapter implements AuthCookieRepositoryPort {
             .build();
     }
 
-    public ResponseCookie clear() {
+    public ResponseCookie clearCookie() {
         return ResponseCookie.from(refreshTokenName, "")
             .httpOnly(true).secure(true).sameSite(STRICT)
             .path(refreshTokenEndpoint)

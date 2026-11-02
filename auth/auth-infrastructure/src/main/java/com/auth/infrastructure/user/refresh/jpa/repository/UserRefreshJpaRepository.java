@@ -9,7 +9,7 @@ import com.base.infrastructure.jpa.repository.BaseJpaRepository;
 public interface UserRefreshJpaRepository
     extends BaseJpaRepository<UserRefreshJpaEntity> {
 
-    Optional<UserRefreshJpaEntity> findByTokenAndOrigin(String token, String origin);
+    Optional<UserRefreshJpaEntity> findByToken(String token);
 
     long deleteByToken(String token);
 

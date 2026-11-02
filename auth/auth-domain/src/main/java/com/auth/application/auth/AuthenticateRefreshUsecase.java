@@ -29,7 +29,7 @@ public class AuthenticateRefreshUsecase {
             throw new MetierException(ERROR_REFRESH_TOKEN);
         }
 
-        var userRefresh = findUserRefreshByTokenUsecase.execute(refreshToken, origin);
+        var userRefresh = findUserRefreshByTokenUsecase.execute(refreshToken);
 
         deleteUserRefreshByTokenUsecase.execute(refreshToken);
 
@@ -40,10 +40,9 @@ public class AuthenticateRefreshUsecase {
         var newRefreshToken = createUserRefreshUsecase.execute(user,
             origin, ipAdress, authCookieRepository.getRefreshTokenTimeToLive());
 
-        var jwt = authJwtRepository.generateTokenJwt(
-            user, origin);
+        var jwt = authJwtRepository.generateTokenJwt(user, origin);
 
-        var cookie = authCookieRepository.create(newRefreshToken);
+        var cookie = authCookieRepository.createCookie(newRefreshToken);
 
         user.setRoles(user.getRolesFromOrigin(origin));
 

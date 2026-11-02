@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,29 +40,26 @@ class UserRefreshAdapterTest {
     void findByToken_returnsMappedDomainWhenFound() {
         var entity = new UserRefreshJpaEntity();
         var domain = new UserRefresh();
-        when(repository.findByTokenAndOrigin(
-            eq("abc"), any(String.class))).thenReturn(Optional.of(entity));
+        when(repository.findByToken("abc")).thenReturn(Optional.of(entity));
         when(mapper.toDomain(entity)).thenReturn(domain);
 
-        assertThat(adapter.findByTokenAndOrigin("abc", "origin")).isSameAs(domain);
+        assertThat(adapter.findByToken("abc")).isSameAs(domain);
     }
 
     @Test
     void findByToken_passesCurrentInstantToRepository() {
-        when(repository.findByTokenAndOrigin(
-            eq("abc"), any(String.class))).thenReturn(Optional.empty());
+        when(repository.findByToken("abc")).thenReturn(Optional.empty());
 
-        adapter.findByTokenAndOrigin("abc", "origin");
+        adapter.findByToken("abc");
 
-        verify(repository).findByTokenAndOrigin("abc", "origin");
+        verify(repository).findByToken("abc");
     }
 
     @Test
     void findByToken_returnsNullWhenNotFound() {
-        when(repository.findByTokenAndOrigin(
-            eq("unknown"), any(String.class))).thenReturn(Optional.empty());
+        when(repository.findByToken("unknown")).thenReturn(Optional.empty());
 
-        assertThat(adapter.findByTokenAndOrigin("unknown", "origin")).isNull();
+        assertThat(adapter.findByToken("unknown")).isNull();
         verify(mapper).toDomain(null);
     }
 

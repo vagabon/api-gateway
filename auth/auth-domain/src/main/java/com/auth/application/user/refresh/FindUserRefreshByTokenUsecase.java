@@ -16,10 +16,9 @@ public class FindUserRefreshByTokenUsecase {
 
     private final UserRefreshRepositoryPort userRefreshrepository;
 
-    public UserRefresh execute(String refreshToken, String origin) {
+    public UserRefresh execute(String refreshToken) {
 
-        var userRefresh = userRefreshrepository.findByTokenAndOrigin(refreshToken,
-            origin);
+        var userRefresh = userRefreshrepository.findByToken(refreshToken);
         if (userRefresh == null) {
             throw new MetierException(USER_REFRESH_NOT_FOUND);
         }
