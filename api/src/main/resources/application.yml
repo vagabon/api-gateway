@@ -58,6 +58,15 @@ spring:
                 - RemoveRequestHeader=Authorization
                 - RemoveRequestHeader=Origin
 
+            - id: movie-keeper
+              uri: ${MOVIE_KEEPER_URI:http://localhost:8086}
+              predicates:
+                - Path=/movie-keeper/**
+              filters:
+                - RewritePath=/movie-keeper/?(?<segment>.*), /$\{segment}
+                - RemoveRequestHeader=Authorization
+                - RemoveRequestHeader=Origin
+
   devtools:
     restart:
       enabled: true

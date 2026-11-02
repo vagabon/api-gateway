@@ -3,22 +3,34 @@ services:
     container_name: gateway
     build: docker
     restart: unless-stopped
+    mem_limit: 512m
+    memswap_limit: 512m
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
       - .env
+    environment:
+      JAVA_OPTS: >-
+        -XX:MaxRAMPercentage=60
+        -XX:MaxMetaspaceSize=128m
+        -XX:+ExitOnOutOfMemoryError
+        -Xss512k
     ports:
       - "8080:8080"
     volumes:
       - ./api/target/api-1.0.0-SNAPSHOT.jar:/app/app.jar:ro
     networks:
-      - redis-net
       - postgres-net
+      - redis-net
+      - mongodb-net
 
 networks:
+  postgres-net:
+    external: true
+    name: postgres-net
   redis-net:
     external: true
     name: redis-net
-  postgres-net:
+  mongodb-net:
     external: true
-    name: postgres_postgres
+    name: mongodb-net

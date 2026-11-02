@@ -5,4 +5,5 @@ RUN useradd --system --no-create-home spring
 USER spring
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar"]
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=60"
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

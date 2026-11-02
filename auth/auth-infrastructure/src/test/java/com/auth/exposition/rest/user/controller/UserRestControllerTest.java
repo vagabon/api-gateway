@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,7 +39,7 @@ class UserRestControllerTest {
     @Test
     void me_shouldReturn200_whenUserHasRoleUser() {
         var user = new User();
-        var jwt = Mockito.mock(Jwt.class);
+        var jwt = mock(Jwt.class);
         when(jwt.getSubject()).thenReturn("42");
         when(findByIdUsecase.execute(42L)).thenReturn(user);
 
