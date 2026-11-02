@@ -56,7 +56,6 @@ public class UserRestController
     public ResponseEntity<User> create(@Valid @RequestBody User request) {
         var userResponse = CreateController.super.create(request);
         cachedUserUsecase.execute(userResponse.getBody());
-        userRedisAdapter.evict(userResponse.getBody().getId());
         return userResponse;
     }
 

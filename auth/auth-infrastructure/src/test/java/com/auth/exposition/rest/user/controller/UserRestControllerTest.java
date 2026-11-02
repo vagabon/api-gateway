@@ -3,6 +3,7 @@ package com.auth.exposition.rest.user.controller;
 import com.auth.application.user.user.CachedUserUsecase;
 import com.auth.domain.user.user.model.User;
 import com.auth.domain.user.user.model.UserLight;
+import com.auth.infrastructure.user.user.adapter.UserRedisAdapter;
 import com.base.application.CreateUsecase;
 import com.base.application.FindByIdUsecase;
 import com.base.application.FindByUsecase;
@@ -32,6 +33,8 @@ class UserRestControllerTest {
     UpdateUsecase<User> updateUsecase;
     @Mock
     CachedUserUsecase cachedUserUsecase;
+    @Mock
+    UserRedisAdapter userRedisAdapter;
 
     @InjectMocks
     UserRestController controller;
